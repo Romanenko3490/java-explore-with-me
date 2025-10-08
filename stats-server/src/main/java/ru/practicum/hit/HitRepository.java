@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface HitRepository extends JpaRepository<Hit, Long>{
+public interface HitRepository extends JpaRepository<Hit, Long> {
 
     // === Все хиты (unique = false) ===
 

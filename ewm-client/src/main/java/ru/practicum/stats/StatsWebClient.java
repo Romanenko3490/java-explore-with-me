@@ -29,15 +29,19 @@ public class StatsWebClient extends BaseWebClient {
                 .bodyValue(request)
                 .retrieve()
                 .toBodilessEntity()
-                .doOnSuccess(response -> {log.info("Hit saved successfully");})
-                .doOnError(throwable -> {log.error("Hit save failed : {}", throwable.getMessage());})
+                .doOnSuccess(response -> {
+                    log.info("Hit saved successfully");
+                })
+                .doOnError(throwable -> {
+                    log.error("Hit save failed : {}", throwable.getMessage());
+                })
                 .block();
     }
 
-    public List<ViewStatsDto>  getStats(LocalDateTime start,
-                                            LocalDateTime end,
-                                            List<String> uris,
-                                            boolean unique) {
+    public List<ViewStatsDto> getStats(LocalDateTime start,
+                                       LocalDateTime end,
+                                       List<String> uris,
+                                       boolean unique) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/stats")
@@ -45,7 +49,7 @@ public class StatsWebClient extends BaseWebClient {
                         .queryParam("end", end)
                         .queryParam("unique", unique)
                         .queryParam("uris", uris != null && !uris.isEmpty() ?
-                                String.join(",",uris) : null)
+                                String.join(",", uris) : null)
                         .build())
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()

@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+
+stats-server:
+  url: "http://stats-server:9090"
+
+ewm-service:
+  url: "http://ewm-service:8081"
+
+
+spring:
+  main:
+    banner-mode: off

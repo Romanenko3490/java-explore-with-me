@@ -1,0 +1,419 @@
+{
+	"info": {
+		"_postman_id": "faecb0bc-2033-4479-87c9-9a2b1129aee8",
+		"name": "ewm",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45515798",
+		"_collection_link": "https://german-6705617.postman.co/workspace/German's-Workspace~63c0fd15-9840-48e5-8f23-c9340cfdad4c/collection/45515798-faecb0bc-2033-4479-87c9-9a2b1129aee8?action=share&source=collection_link&creator=45515798"
+	},
+	"item": [
+		{
+			"name": "Successfull add hit",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Status code is 201 Created\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response body is empty\", function () {\r",
+							"    const responseText = pm.response.text();\r",
+							"    pm.expect(responseText).to.be.empty;\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"app\": \"ewm-main-service\",\n  \"uri\": \"/events/1\",\n  \"ip\": \"192.163.0.1\",\n  \"timestamp\": \"2022-09-06 11:00:23\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/hit",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"hit"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get stats within dates without uri and not unique",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"const start = pm.environment.get(\"start\");\r",
+							"\r",
+							"const fixedTimestamp = \"2025-10-07 12:00:00\";\r",
+							"\r",
+							"const hits = [\r",
+							"    { app: \"test-app\", uri: \"/a\", ip: \"192.168.1.1\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/a\", ip: \"192.168.1.2\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/a\", ip: \"192.168.1.3\", timestamp: fixedTimestamp },\r",
+							"    \r",
+							"    { app: \"test-app\", uri: \"/b\", ip: \"192.168.2.1\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/b\", ip: \"192.168.2.2\", timestamp: fixedTimestamp },\r",
+							"    \r",
+							"    { app: \"test-app\", uri: \"/c\", ip: \"192.168.3.1\", timestamp: fixedTimestamp }\r",
+							"];\r",
+							"\r",
+							"function sendHit(index) {\r",
+							"    if (index >= hits.length) {\r",
+							"        // Ждём 1 секунду, чтобы сервер успел сохранить\r",
+							"        setTimeout(() => {}, 1000);\r",
+							"        return;\r",
+							"    }\r",
+							"\r",
+							"    const hit = hits[index];\r",
+							"    pm.sendRequest({\r",
+							"        url: `${baseUrl}/hit`,\r",
+							"        method: 'POST',\r",
+							"        header: { 'Content-Type': 'application/json' },\r",
+							"        body: JSON.stringify(hit)\r",
+							"    }, function (err, res) {\r",
+							"        if (err) {\r",
+							"            console.error(\"Ошибка:\", err);\r",
+							"        }\r",
+							"        sendHit(index + 1);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"sendHit(0);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"pm.test(\"Response is an array\", function () {\r",
+							"    pm.expect(Array.isArray(jsonData)).to.be.true;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains 3 URIs\", function () {\r",
+							"    pm.expect(jsonData.length).to.eql(3);\r",
+							"});\r",
+							"\r",
+							"jsonData.forEach(item => {\r",
+							"    pm.expect(item).to.include.all.keys('app', 'uri', 'hits');\r",
+							"    pm.expect(item.app).to.eql(\"test-app\");\r",
+							"    pm.expect(item.hits).to.be.a('number').and.to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Results are sorted by hits descending\", function () {\r",
+							"    for (let i = 0; i < jsonData.length - 1; i++) {\r",
+							"        pm.expect(jsonData[i].hits).to.be.at.least(jsonData[i + 1].hits);\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"const expected = [\r",
+							"    { uri: \"/a\", hits: 3 },\r",
+							"    { uri: \"/b\", hits: 2 },\r",
+							"    { uri: \"/c\", hits: 1 }\r",
+							"];\r",
+							"\r",
+							"pm.test(\"Exact hit counts match expected values\", function () {\r",
+							"    for (let i = 0; i < expected.length; i++) {\r",
+							"        pm.expect(jsonData[i].uri).to.eql(expected[i].uri);\r",
+							"        pm.expect(jsonData[i].hits).to.eql(expected[i].hits);\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/stats?start={{start}}&end={{end}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"stats"
+					],
+					"query": [
+						{
+							"key": "start",
+							"value": "{{start}}"
+						},
+						{
+							"key": "end",
+							"value": "{{end}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Gets stats within dates with uri and not unique",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"const start = pm.environment.get(\"start\");\r",
+							"const fixedTimestamp = \"2025-10-07 12:00:00\";\r",
+							"\r",
+							"const hits = [\r",
+							"    { app: \"test-app\", uri: \"/x\", ip: \"10.0.0.1\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/x\", ip: \"10.0.0.2\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/x\", ip: \"10.0.0.3\", timestamp: fixedTimestamp },\r",
+							"    \r",
+							"    { app: \"test-app\", uri: \"/y\", ip: \"10.0.1.1\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/y\", ip: \"10.0.1.2\", timestamp: fixedTimestamp }\r",
+							"];\r",
+							"\r",
+							"function sendHit(index) {\r",
+							"    if (index >= hits.length) {\r",
+							"        setTimeout(() => {}, 1000);\r",
+							"        return;\r",
+							"    }\r",
+							"    const hit = hits[index];\r",
+							"    pm.sendRequest({\r",
+							"        url: `${baseUrl}/hit`,\r",
+							"        method: 'POST',\r",
+							"        header: { 'Content-Type': 'application/json' },\r",
+							"        body: JSON.stringify(hit)\r",
+							"    }, function (err, res) {\r",
+							"        if (err) console.error(\"Ошибка:\", err);\r",
+							"        sendHit(index + 1);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"sendHit(0);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has exactly 2 items: /x and /y\", function () {\r",
+							"    pm.expect(jsonData.length).to.eql(2);\r",
+							"    const uris = jsonData.map(x => x.uri);\r",
+							"    pm.expect(uris).to.include(\"/x\");\r",
+							"    pm.expect(uris).to.include(\"/y\");\r",
+							"\r",
+							"    pm.expect(uris).to.not.include(\"/a\");\r",
+							"    pm.expect(uris).to.not.include(\"/b\");\r",
+							"    pm.expect(uris).to.not.include(\"/c\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Hit counts are correct\", function () {\r",
+							"    const x = jsonData.find(x => x.uri === \"/x\");\r",
+							"    const y = jsonData.find(x => x.uri === \"/y\");\r",
+							"    pm.expect(x.hits).to.eql(3);\r",
+							"    pm.expect(y.hits).to.eql(2);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Sorted by hits descending\", function () {\r",
+							"    pm.expect(jsonData[0].uri).to.eql(\"/x\");\r",
+							"    pm.expect(jsonData[1].uri).to.eql(\"/y\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/stats?start={{start}}&end={{end}}&uris=/x&uris=/y",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"stats"
+					],
+					"query": [
+						{
+							"key": "start",
+							"value": "{{start}}"
+						},
+						{
+							"key": "end",
+							"value": "{{end}}"
+						},
+						{
+							"key": "uris",
+							"value": "/x"
+						},
+						{
+							"key": "uris",
+							"value": "/y"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get stats within dates with uri and unique true",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"const fixedTimestamp = \"2025-10-07 12:00:00\";\r",
+							"\r",
+							"const hits = [\r",
+							"    { app: \"test-app\", uri: \"/u\", ip: \"172.16.0.1\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/u\", ip: \"172.16.0.1\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/u\", ip: \"172.16.0.2\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/v\", ip: \"172.16.1.1\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/v\", ip: \"172.16.1.1\", timestamp: fixedTimestamp },\r",
+							"    { app: \"test-app\", uri: \"/v\", ip: \"172.16.1.1\", timestamp: fixedTimestamp }\r",
+							"];\r",
+							"\r",
+							"function sendHit(index) {\r",
+							"    if (index >= hits.length) {\r",
+							"        setTimeout(() => {}, 1000);\r",
+							"        return;\r",
+							"    }\r",
+							"    const hit = hits[index];\r",
+							"    pm.sendRequest({\r",
+							"        url: `${baseUrl}/hit`,\r",
+							"        method: 'POST',\r",
+							"        header: { 'Content-Type': 'application/json' },\r",
+							"        body: JSON.stringify(hit)\r",
+							"    }, function (err, res) {\r",
+							"        if (err) console.error(\"Ошибка:\", err);\r",
+							"        sendHit(index + 1);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"sendHit(0);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has /u and /v only\", function () {\r",
+							"    pm.expect(jsonData.length).to.eql(2);\r",
+							"    const uris = jsonData.map(x => x.uri);\r",
+							"    pm.expect(uris).to.include(\"/u\");\r",
+							"    pm.expect(uris).to.include(\"/v\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Unique counts: /u=2, /v=1\", function () {\r",
+							"    const u = jsonData.find(x => x.uri === \"/u\");\r",
+							"    const v = jsonData.find(x => x.uri === \"/v\");\r",
+							"    pm.expect(u.hits).to.eql(2);\r",
+							"    pm.expect(v.hits).to.eql(1);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Sorted descending\", function () {\r",
+							"    pm.expect(jsonData[0].uri).to.eql(\"/u\");\r",
+							"    pm.expect(jsonData[1].uri).to.eql(\"/v\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/stats?start={{start}}&end={{end}}&unique=true&uris=/u&uris=/v",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"stats"
+					],
+					"query": [
+						{
+							"key": "start",
+							"value": "{{start}}"
+						},
+						{
+							"key": "end",
+							"value": "{{end}}"
+						},
+						{
+							"key": "unique",
+							"value": "true"
+						},
+						{
+							"key": "uris",
+							"value": "/u"
+						},
+						{
+							"key": "uris",
+							"value": "/v"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

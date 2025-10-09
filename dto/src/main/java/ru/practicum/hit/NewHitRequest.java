@@ -4,18 +4,16 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import org.hibernate.validator.constraints.URL;
-import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 
 
 @Value // Работает так же как и @Data только создает immutable класс с final полями и без сеттеров
 @Jacksonized // @Value конфликтует с джексеном, и он не может десериальизвать
-             // LocalDateTime, нужна зависимость jackson-databind
+// LocalDateTime, нужна зависимость jackson-databind
 @Builder // @Jacksonized работает через @Buildeer
 public class NewHitRequest {
 

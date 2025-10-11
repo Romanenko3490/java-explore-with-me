@@ -1,6 +1,6 @@
 package ru.practicum.hit;
 
-public interface HitData {
+public interface HitProjection {
     String getApp();
 
     String getUri();

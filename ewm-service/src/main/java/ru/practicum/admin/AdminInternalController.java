@@ -8,9 +8,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.categories.CategoryDto;
 import ru.practicum.categories.NewCategoryRequest;
 import ru.practicum.categories.UpdateCategoryRequest;
+import ru.practicum.events.EventDto;
+import ru.practicum.events.UpdateEventRequest;
 import ru.practicum.user.UserRequest;
 import ru.practicum.user.UserDto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -38,6 +41,7 @@ public class AdminInternalController {
     }
 
     @DeleteMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(
             @PathVariable Long id
     ) {
@@ -53,6 +57,7 @@ public class AdminInternalController {
     }
 
     @DeleteMapping("/categories/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable Long id) {
         adminService.deleteCategory(id);
     }
@@ -63,6 +68,33 @@ public class AdminInternalController {
             @RequestBody UpdateCategoryRequest request
     ) {
         return adminService.updateCategory(id, request);
+    }
+
+    //события
+
+    @GetMapping("/events")
+    public List<EventDto> getEvents(
+            @RequestParam(required = false) List<Long> users,
+            @RequestParam(required = false) List<String> states,
+            @RequestParam(required = false) List<Long> categories,
+            @RequestParam(required = false) LocalDateTime rangeStart,
+            @RequestParam(required = false) LocalDateTime rangeEnd,
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        return adminService.getEvents(users,
+                states,
+                categories,
+                rangeStart,
+                rangeEnd,
+                from, size);
+    }
+
+    @PatchMapping("/events/{eventId}")
+    public EventDto updateEvent(
+            @PathVariable Long eventId,
+            @RequestBody UpdateEventRequest request) {
+        return adminService.updateEvent(eventId, request);
     }
 
 }

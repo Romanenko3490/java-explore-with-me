@@ -4,16 +4,18 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.practicum.categories.CategoryDto;
 import ru.practicum.categories.NewCategoryRequest;
 import ru.practicum.categories.UpdateCategoryRequest;
+import ru.practicum.events.EventDto;
+import ru.practicum.events.UpdateEventRequest;
 import ru.practicum.user.UserDto;
 import ru.practicum.user.UserRequest;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -23,6 +25,7 @@ import java.util.List;
 public class AdminController {
     private final AdminWebUserClient adminUserClient;
     private final AdminWebCategoriesClient adminCategoriesClient;
+    private final AdminWebEventClient adminWebEventClient;
 
     //Users
 
@@ -44,10 +47,11 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(
             @PathVariable @Min(1) Long id
     ) {
-        return adminUserClient.deleteUser(id);
+        adminUserClient.deleteUser(id);
     }
 
     //Categories
@@ -57,15 +61,16 @@ public class AdminController {
     public CategoryDto addCategory(
             @Valid
             @RequestBody NewCategoryRequest request
-            ) {
+    ) {
         return adminCategoriesClient.addCategory(request);
     }
 
     @DeleteMapping("/categories/{id}")
-    public ResponseEntity<Void> deleteCategory(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCategory(
             @PathVariable @Min(1) Long id
     ) {
-        return adminCategoriesClient.deleteCategory(id);
+        adminCategoriesClient.deleteCategory(id);
     }
 
     @PatchMapping("/categories/{id}")
@@ -75,4 +80,33 @@ public class AdminController {
     ) {
         return adminCategoriesClient.updateCategory(id, request);
     }
+
+    //События
+
+    @GetMapping("/events")
+    public Mono<List<EventDto>> getEvents(
+            @RequestParam(required = false) List<Long> users,
+            @RequestParam(required = false) List<String> states,
+            @RequestParam(required = false) List<Long> categories,
+            @RequestParam(required = false) LocalDateTime rangeStart,
+            @RequestParam(required = false) LocalDateTime rangeEnd,
+            @RequestParam(defaultValue = "0") @Min(0) Integer from,
+            @RequestParam(defaultValue = "10") @Min(1) Integer size
+    ) {
+        return adminWebEventClient.getEvents(users,
+                states,
+                categories,
+                rangeStart,
+                rangeEnd,
+                from, size);
+    }
+
+    @PatchMapping("/events/{eventId}")
+    public EventDto updateEvent(
+            @PathVariable Long eventId,
+            @RequestBody UpdateEventRequest request) {
+        return adminWebEventClient.updateEvent(eventId, request);
+    }
+
+
 }

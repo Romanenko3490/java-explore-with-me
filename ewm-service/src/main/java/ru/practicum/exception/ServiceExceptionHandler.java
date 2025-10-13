@@ -24,4 +24,25 @@ public class ServiceExceptionHandler {
         return ex.getMessage();
     }
 
+    @ExceptionHandler(EventDataException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleEventDataException(EventDataException ex) {
+        log.warn("Forbidden in service: {}", ex.getMessage());
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(CategoryConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public  String handleCategoryConflictException(CategoryConflictException ex) {
+        log.warn("Category conflict in service: {}", ex.getMessage());
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleEventUpdateForbiddenException(ForbiddenException ex) {
+        log.warn("Forbidden in service: {}", ex.getMessage());
+        return ex.getMessage();
+    }
+
 }

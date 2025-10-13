@@ -1,17 +1,21 @@
 package ru.practicum.admin;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.categories.*;
+import ru.practicum.events.*;
+import ru.practicum.exception.CategoryConflictException;
 import ru.practicum.exception.DataConflictException;
+import ru.practicum.exception.EventDataException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,9 +26,11 @@ import java.util.stream.Collectors;
 public class AdminService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     private final UserMapper userMapper;
     private final CategoryMapper categoryMapper;
+    private  final EventMapper eventMapper;
 
     //Users
     public UserDto addUser(UserRequest request) {
@@ -33,7 +39,7 @@ public class AdminService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DataConflictException(
                     "could not execute statement; SQL [n/a];" +
-                            " constraint " +  request.getEmail() + ";" +
+                            " constraint " + request.getEmail() + ";" +
                             " nested exception is org.hibernate.exception." +
                             "ConstraintViolationException: could not execute statement");
         }
@@ -102,15 +108,9 @@ public class AdminService {
         if (!categoryRepository.existsById(id)) {
             throw new NotFoundException("Category with id=" + id + " was not found");
         }
-
-        // if (существуют события связаные с категорией) {
-        //          throw new DataConflictException()
-
-//                "status": "CONFLICT",
-//                "reason": "For the requested operation the conditions are not met.",
-//                "message": "The category is not empty",
-//                "timestamp": "2023-01-21 16:56:19
-//             }
+        if (eventRepository.existsByCategory_Id(id)) {
+            throw new CategoryConflictException("The category is not empty");
+        }
 
         categoryRepository.deleteById(id);
     }
@@ -131,6 +131,117 @@ public class AdminService {
 
         category.setName(request.getName());
         return categoryMapper.categoryToCategoryDto(categoryRepository.save(category));
+    }
+
+    //события
+
+    public List<EventDto> getEvents(
+            List<Long> users,
+            List<String> states,
+            List<Long> categories,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            Integer from,
+            Integer size
+    ) {
+
+        List<EventState> eventStates = parseStates(states);
+
+        Pageable pageable = PageRequest.of(from / size, size);
+
+        List<Event> eventList = eventRepository.findByFilters(users,
+                eventStates,
+                categories,
+                rangeStart,
+                rangeEnd,
+                pageable);
+
+        return null;
+
+    }
+
+    private List<EventState> parseStates(List<String> states) {
+        if (states != null && !states.isEmpty()) {
+            return null;
+        }
+
+        return states.stream()
+                .map(state -> {
+                    try {
+                        return EventState.valueOf(state.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        throw new ValidationException("Invalid event state: " + state);
+                    }
+
+                })
+                .collect(Collectors.toList());
+
+    }
+
+    public EventDto updateEvent(Long eventId, UpdateEventRequest request) {
+        log.debug("Updating event {} , by request : {}", eventId, request);
+
+        Event event = eventRepository.findById(eventId).orElseThrow(
+                () -> new NotFoundException("Event with id=" + eventId + " was not found"));
+
+        boolean isPublished = event.getState().equals(EventState.PUBLISHED);
+
+        if (request.hasAnnotation()) {
+            event.setAnnotation(request.getAnnotation());
+        }
+        if (request.hasCategory()) {
+            event.setCategory(categoryRepository.findById(request.getCategory()).orElseThrow(
+                    () -> new NotFoundException("Category with id=" + request.getCategory() + " was not found")
+            ));
+        }
+        if (request.hasDescription()) {
+            event.setDescription(request.getDescription());
+        }
+        if (request.hasLocation()) {
+            Location location = new Location(request.getLocation().getLat(), request.getLocation().getLon());
+            event.setLocation(location);
+        }
+        if (request.hasParticipantLimit()) {
+            event.setParticipantLimit(request.getParticipantLimit());
+        }
+        if (request.hasRequestModeration()) {
+            event.setRequestModeration(request.getRequestModeration());
+        }
+        if (request.hasTitle()) {
+            event.setTitle(request.getTitle());
+        }
+        if (request.hasPaid()) {
+            event.setPaid(request.getPaid());
+        }
+        if (request.hasEventDate()) {
+            if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+                throw new EventDataException("Event date must be at least 1 hour in the future");
+            }
+            event.setEventDate(request.getEventDate());
+        }
+
+        if (request.getStateAction() != null) {
+            switch (request.getStateAction()) {
+                case PUBLISH_EVENT -> {
+                    if (!event.getState().equals(EventState.PENDING)) {
+                        throw new EventDataException("Cannot publish the event because it's " +
+                                "not in the right state: " + event.getState());
+                    }
+                    event.setState(EventState.PUBLISHED);
+                    event.setPublishedOn(LocalDateTime.now());
+                }
+                case REJECT_EVENT -> {
+                    if (!event.getState().equals(EventState.PENDING)) {
+                        throw new EventDataException("Cannot reject the event because it is not " +
+                                "in the right state: " + event.getState());
+                    }
+                    event.setState(EventState.CANCELED);
+                }
+            }
+        }
+
+        event = eventRepository.save(event);
+        return eventMapper.toDto(event);
     }
 
 }

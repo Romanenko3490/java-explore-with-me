@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import ru.practicum.base.BaseWebClient;
 import ru.practicum.exception.DataConflictException;
@@ -35,9 +36,7 @@ public class AdminWebUserClient extends BaseWebClient {
                 .retrieve()
                 .onStatus(status -> status == HttpStatus.CONFLICT,
                         response -> response.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new DataConflictException(
-                                        "Conflict from service: " + errorBody
-                                ))))
+                                .flatMap(errorBody -> Mono.error(new DataConflictException(errorBody))))
                 .bodyToMono(UserDto.class)
                 .block();
     }
@@ -54,18 +53,21 @@ public class AdminWebUserClient extends BaseWebClient {
                 .collectList();
     }
 
-    public ResponseEntity<Void> deleteUser(Long id) {
-        return webClient.delete()
-                .uri("/" + id)
-                .retrieve()
-                .toBodilessEntity()
-                .doOnSuccess(response -> {
-                    log.info("Delete user: " + id);
-                })
-                .doOnError(error -> {
-                    log.error("Delete user: " + id, error);
-                    throw new NotFoundException("User with id=" + id + " was not found");
-                })
-                .block();
+    public void deleteUser(Long id) {
+        try {
+            webClient.delete()
+                    .uri("/" + id)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .doOnSuccess(response -> {
+                        log.info("Delete user: " + id);
+                    })
+                    .block();
+        } catch (WebClientResponseException ex) {
+            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw  new NotFoundException("User with id=" + id + " was not found");
+            }
+            throw ex;
+        }
     }
 }

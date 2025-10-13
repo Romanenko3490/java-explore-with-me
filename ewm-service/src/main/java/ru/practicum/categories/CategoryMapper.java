@@ -4,5 +4,5 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
-    CategoryDto categoryToCategoryDto(CategoryProjection category);
+    CategoryDto categoryToCategoryDto(Category category);
 }

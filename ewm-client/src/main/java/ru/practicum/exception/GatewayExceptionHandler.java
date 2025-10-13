@@ -83,13 +83,10 @@ public class GatewayExceptionHandler {
     public Violation handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         log.warn("Method argument type mismatch: {}", ex.getMessage());
 
-        String message = "Failed to convert value of type java.lang.String to required type int;" +
-                " nested exception is java.lang.NumberFormatException: For input string: ad";
-
         return new Violation(
                 HttpStatus.BAD_REQUEST,
                 "Incorrectly made request.",
-                message
+                ex.getMessage()
         );
     }
 
@@ -101,6 +98,42 @@ public class GatewayExceptionHandler {
         return new Violation(
                 HttpStatus.NOT_FOUND,
                 "The required object was not found.",
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(EventDataException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Violation handleEventDataException(EventDataException ex) {
+        log.warn("Forbidden: {}", ex.getMessage());
+
+        return new Violation(
+                HttpStatus.FORBIDDEN,
+                "For the requested operation the conditions are not met.",
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(CategoryConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Violation handleCategoryConflictException(CategoryConflictException ex) {
+        log.warn("Category conflict: {}", ex.getMessage());
+
+        return new Violation(
+                HttpStatus.CONFLICT,
+                "For the requested operation the conditions are not met.",
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Violation handleEventUpdateForbiddenException(ForbiddenException ex) {
+        log.warn("Forbidden: {}", ex.getMessage());
+
+        return new Violation(
+                HttpStatus.FORBIDDEN,
+                "For the requested operation the conditions are not met.",
                 ex.getMessage()
         );
     }

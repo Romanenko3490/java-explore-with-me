@@ -13,7 +13,7 @@ import lombok.*;
 @Getter
 @Setter
 @Table(name = "categories")
-public class Category implements CategoryProjection {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

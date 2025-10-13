@@ -3,21 +3,17 @@ package ru.practicum.admin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import ru.practicum.base.BaseWebClient;
 import ru.practicum.categories.CategoryDto;
 import ru.practicum.categories.NewCategoryRequest;
 import ru.practicum.categories.UpdateCategoryRequest;
+import ru.practicum.exception.CategoryConflictException;
 import ru.practicum.exception.DataConflictException;
 import ru.practicum.exception.NotFoundException;
-
-import java.util.concurrent.locks.ReadWriteLock;
 
 @Service
 @Slf4j
@@ -40,22 +36,31 @@ public class AdminWebCategoriesClient extends BaseWebClient {
                                         "Conflict from service: " + errorBody
                                 ))))
                 .bodyToMono(CategoryDto.class)
+                .doOnSuccess(response -> {
+                    log.info("Successfully added a new category: " + request);
+                })
                 .block();
     }
 
-    public ResponseEntity<Void> deleteCategory(Long id) {
+    public void deleteCategory(Long id) {
         log.debug("Deleting category: " + id);
-        return webClient.delete()
-                .uri("/" + id)
-                .retrieve()
-                .toBodilessEntity()
-                .doOnSuccess(response ->
-                        log.info("Deleting category: " + id))
-                .doOnError(response -> {
-                    log.info("Deleting error category: " + id);
-                    throw new NotFoundException("Category with id=" + id + " was not found");
-                })
-                .block();
+        try {
+            webClient.delete()
+                    .uri("/" + id)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .doOnSuccess(response -> {
+                        log.info("Category deleted successfully: " + id);
+                    })
+                    .block();
+        } catch (WebClientResponseException ex) {
+            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new NotFoundException("Category with id=" + id + " not found");
+            } else if (ex.getStatusCode() == HttpStatus.CONFLICT) {
+                throw new CategoryConflictException("The category is not empty");
+            }
+            throw ex;
+        }
     }
 
     public CategoryDto updateCategory(Long id, UpdateCategoryRequest request) {
@@ -67,6 +72,9 @@ public class AdminWebCategoriesClient extends BaseWebClient {
                     .bodyValue(request)
                     .retrieve()
                     .bodyToMono(CategoryDto.class)
+                    .doOnSuccess(response -> {
+                        log.info("Category updated successfully: " + id);
+                    })
                     .block();
         } catch (WebClientResponseException ex) {
             if (ex.getStatusCode() == HttpStatus.CONFLICT) {

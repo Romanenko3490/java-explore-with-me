@@ -70,7 +70,7 @@ public class Event {
     private EventState state = EventState.PENDING;
 
     @Column(name = "confirmed_requests",  nullable = false)
-    private Long confirmedRequests;
+    private Integer confirmedRequests;
 
     private Long views = 0L;
 }

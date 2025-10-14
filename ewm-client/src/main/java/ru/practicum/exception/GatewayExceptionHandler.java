@@ -128,7 +128,7 @@ public class GatewayExceptionHandler {
 
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Violation handleEventUpdateForbiddenException(ForbiddenException ex) {
+    public Violation handleForbiddenException(ForbiddenException ex) {
         log.warn("Forbidden: {}", ex.getMessage());
 
         return new Violation(

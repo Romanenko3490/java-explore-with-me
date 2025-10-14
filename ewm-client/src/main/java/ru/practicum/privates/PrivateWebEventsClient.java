@@ -12,11 +12,9 @@ import ru.practicum.base.BaseWebClient;
 import ru.practicum.events.EventDto;
 import ru.practicum.events.NewEventRequest;
 import ru.practicum.events.UpdateEventRequest;
-import ru.practicum.exception.DataConflictException;
 import ru.practicum.exception.EventDataException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.requests.RequestDto;
 
 import java.util.List;
 
@@ -67,23 +65,19 @@ public class PrivateWebEventsClient extends BaseWebClient {
     }
 
     public Mono<List<EventDto>> getUserEvents(Long userId, Integer from, Integer size) {
-        try {
-            return webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/" + userId + "/events")
-                            .queryParam("from", from)
-                            .queryParam("size", size)
-                            .build())
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .bodyToFlux(EventDto.class)
-                    .collectList();
-        } catch (WebClientResponseException ex) {
-            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new NotFoundException(ex.getResponseBodyAsString());
-            }
-            throw ex;
-        }
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/" + userId + "/events")
+                        .queryParam("from", from)
+                        .queryParam("size", size)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(status -> status == HttpStatus.NOT_FOUND, response -> {
+                    throw new NotFoundException("User with id " + userId + " not found");
+                })
+                .bodyToFlux(EventDto.class)
+                .collectList();
     }
 
     public EventDto updateEvent(Long userId, Long eventId, UpdateEventRequest request) {
@@ -109,60 +103,5 @@ public class PrivateWebEventsClient extends BaseWebClient {
         }
     }
 
-    //Private: Запросы на участие
-    //Закрытый API для работы с запросами текущего пользователя на участие в событиях
-
-    public RequestDto addRequest(Long userId, Long eventId) {
-        try {
-            return webClient.post()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/" + userId + "/requests")
-                            .queryParam("eventId", eventId)
-                            .build())
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .bodyToMono(RequestDto.class)
-                    .block();
-        } catch (WebClientResponseException ex) {
-            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new NotFoundException(ex.getResponseBodyAsString());
-            } else if (ex.getStatusCode() == HttpStatus.CONFLICT) {
-                throw new DataConflictException(ex.getResponseBodyAsString());
-            }
-            throw ex;
-        }
-    }
-
-    public Mono<List<RequestDto>> getUserRequests(Long userId) {
-        try {
-            return webClient.get()
-                    .uri("/" + userId + "/requests")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .bodyToFlux(RequestDto.class)
-                    .collectList();
-        } catch (WebClientResponseException ex) {
-            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new NotFoundException(ex.getResponseBodyAsString());
-            }
-            throw ex;
-        }
-    }
-
-    public RequestDto cancelRequest(Long userId, Long requestId) {
-        try {
-            return webClient.patch()
-                    .uri("/" + userId + "/requests/" + requestId)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .bodyToMono(RequestDto.class)
-                    .block();
-        } catch (WebClientResponseException ex) {
-            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new NotFoundException(ex.getResponseBodyAsString());
-            }
-            throw ex;
-        }
-    }
 
 }

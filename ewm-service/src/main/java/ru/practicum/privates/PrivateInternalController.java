@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.events.EventDto;
 import ru.practicum.events.NewEventRequest;
 import ru.practicum.events.UpdateEventRequest;
+import ru.practicum.requests.EventRequestStatusUpdateRequest;
+import ru.practicum.requests.EventRequestStatusUpdateResult;
 import ru.practicum.requests.RequestDto;
 
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.List;
 public class PrivateInternalController {
     private final PrivateService privateService;
 
+    //Private: события
     @PostMapping("/events")
     @ResponseStatus(HttpStatus.CREATED)
     public EventDto addEvent(
@@ -52,6 +55,25 @@ public class PrivateInternalController {
     ) {
         return privateService.updateEvent(userId, eventId, request);
     }
+
+    @GetMapping("events/{eventId}/requests")
+    public List<RequestDto> getRequests(
+            @PathVariable Long userId,
+            @PathVariable Long eventId
+    ) {
+        return privateService.getRequestsByUserEvent(userId, eventId);
+    }
+
+    @PatchMapping("events/{eventId}/requests")
+    public EventRequestStatusUpdateResult updateEventRequestsStatus (
+            @PathVariable Long userId,
+            @PathVariable Long eventId,
+            @RequestBody EventRequestStatusUpdateRequest request
+    ) {
+        return privateService.updateEventRequestsStatus(userId, eventId, request);
+    }
+
+
 
     //Private: Запросы на участие
     //Закрытый API для работы с запросами текущего пользователя на участие в событиях

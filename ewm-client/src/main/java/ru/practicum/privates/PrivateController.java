@@ -14,6 +14,8 @@ import ru.practicum.events.EventDto;
 import ru.practicum.events.NewEventRequest;
 import ru.practicum.events.UpdateEventRequest;
 import ru.practicum.exception.EventDataException;
+import ru.practicum.requests.EventRequestStatusUpdateRequest;
+import ru.practicum.requests.EventRequestStatusUpdateResult;
 import ru.practicum.requests.RequestDto;
 
 import java.time.LocalDateTime;
@@ -27,6 +29,7 @@ import java.util.List;
 @Validated
 public class PrivateController {
     private final PrivateWebEventsClient privateWebEventsClient;
+    private final PrivateWebRequestsClient privateWebRequestsClient;
 
 
     //Private: События
@@ -73,6 +76,26 @@ public class PrivateController {
         return privateWebEventsClient.updateEvent(userId, eventId, request);
     }
 
+    //получение информации о запросах на участие в событии текущего пользователя
+    @GetMapping("/events/{eventId}/requests")
+    public Mono<List<RequestDto>> getRequests(
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId
+    ) {
+        return privateWebRequestsClient.getRequestsByUserEvent(userId, eventId);
+    }
+
+    //Изменение статуса(подтверждена, отменена) заявок на участие в событии текущего пользователя
+    @PatchMapping("events/{eventId}/requests")
+    public EventRequestStatusUpdateResult updateEventRequestsStatus (
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId,
+            @RequestBody EventRequestStatusUpdateRequest request
+    ) {
+        return privateWebRequestsClient.updateEventRequestsStatus(userId, eventId, request);
+    }
+
+
 
 
     //Private: Запросы на участие
@@ -83,14 +106,14 @@ public class PrivateController {
             @PathVariable @Min(1) Long userId,
             @RequestParam @Min(1) Long eventId
     ) {
-        return privateWebEventsClient.addRequest(userId, eventId);
+        return privateWebRequestsClient.addRequest(userId, eventId);
     }
 
     @GetMapping("/requests")
     public Mono<List<RequestDto>> getUserRequests(
             @PathVariable @Min(1) Long userId
     ) {
-        return privateWebEventsClient.getUserRequests(userId);
+        return privateWebRequestsClient.getUserRequests(userId);
     }
 
     @PatchMapping("/requests/{requestId}/cancel")
@@ -98,8 +121,10 @@ public class PrivateController {
             @PathVariable @Min(1) Long userId,
             @PathVariable @Min(1) Long requestId
     ) {
-        return privateWebEventsClient.cancelRequest(userId, requestId);
+        return privateWebRequestsClient.cancelRequest(userId, requestId);
     }
+
+
 
 
 

@@ -25,3 +25,6 @@ spring:
     password: "12345"
     url: "jdbc:postgresql://ewm-db:5432/ewmdb"
     driver-class-name: org.postgresql.Driver
+
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"

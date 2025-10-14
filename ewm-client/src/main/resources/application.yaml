@@ -12,3 +12,6 @@ ewm-service:
 spring:
   main:
     banner-mode: off
+
+    jackson:
+      date-format: "yyyy-MM-dd HH:mm:ss"

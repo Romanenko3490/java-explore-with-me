@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
     List<Event> findByInitiatorId(Long userId, Pageable pageable);
@@ -46,4 +48,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
 
         return findAll(predicate, pageable).getContent();
     }
+
+    Set<Event> findByIdIn(Collection<Long> ids);
 }

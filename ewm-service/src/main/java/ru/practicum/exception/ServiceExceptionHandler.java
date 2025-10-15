@@ -45,4 +45,11 @@ public class ServiceExceptionHandler {
         return ex.getMessage();
     }
 
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleConflictException(ConflictException ex) {
+        log.warn("Conflict in service: {}", ex.getMessage());
+        return ex.getMessage();
+    }
+
 }

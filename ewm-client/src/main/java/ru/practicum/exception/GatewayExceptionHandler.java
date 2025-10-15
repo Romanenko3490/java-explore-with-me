@@ -138,4 +138,16 @@ public class GatewayExceptionHandler {
         );
     }
 
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Violation handleConflictException(ConflictException ex) {
+        log.warn("Conflict: {}", ex.getMessage());
+
+        return new Violation(
+                HttpStatus.CONFLICT,
+                "For the requested operation the conditions are not met.",
+                ex.getMessage()
+        );
+    }
+
 }

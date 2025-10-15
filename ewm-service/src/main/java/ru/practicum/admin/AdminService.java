@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.categories.*;
+import ru.practicum.compilations.*;
 import ru.practicum.events.*;
 import ru.practicum.exception.CategoryConflictException;
 import ru.practicum.exception.DataConflictException;
@@ -18,6 +19,7 @@ import ru.practicum.user.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,10 +30,12 @@ public class AdminService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
+    private final CompilationsRepository compilationsRepository;
 
     private final UserMapper userMapper;
     private final CategoryMapper categoryMapper;
     private  final EventMapper eventMapper;
+    private final CompilationsMapper compilationsMapper;
 
     //Users
     public UserDto addUser(UserRequest request) {
@@ -258,6 +262,42 @@ public class AdminService {
 
         event = eventRepository.save(event);
         return eventMapper.toDto(event);
+    }
+
+    //подобрки
+
+    public CompilationDto addCompilation(NewCompilationRequest request) {
+        log.info("Adding compilation {}", request);
+
+        if (compilationsRepository.existsByTitle(request.getTitle())) {
+            throw new DataConflictException("could not execute statement; SQL [n/a];" +
+                    " constraint " + request.getTitle() +
+                    "; nested exception is org.hibernate.exception.ConstraintViolationException:" +
+                    " could not execute statement");
+        }
+
+        Set<Event> events = eventRepository.findByIdIn(request.getEvents());
+        log.info("Found {} events", events.size());
+
+        if (events.size() != request.getEvents().size()) {
+            Set<Long> foundEventIds = events.stream()
+                    .map(Event::getId)
+                    .collect(Collectors.toSet());
+            Set<Long> missingEventIds = request.getEvents().stream()
+                    .filter(id -> !foundEventIds.contains(id))
+                    .collect(Collectors.toSet());
+            log.info("Some events not found: {}", missingEventIds);
+        }
+
+        Compilation compilation = compilationsRepository.save(Compilation.builder()
+                .events(events)
+                .title(request.getTitle())
+                .pinned(request.getPinned())
+                .build());
+
+        log.info("Compilation created with id: {}", compilation.getId());
+
+        return compilationsMapper.toDto(compilation);
     }
 
 }

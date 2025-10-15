@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.categories.CategoryDto;
 import ru.practicum.categories.NewCategoryRequest;
 import ru.practicum.categories.UpdateCategoryRequest;
+import ru.practicum.compilations.CompilationDto;
+import ru.practicum.compilations.NewCompilationRequest;
 import ru.practicum.events.EventDto;
 import ru.practicum.events.UpdateEventRequest;
 import ru.practicum.user.UserRequest;
@@ -95,6 +97,14 @@ public class AdminInternalController {
             @PathVariable Long eventId,
             @RequestBody UpdateEventRequest request) {
         return adminService.updateEvent(eventId, request);
+    }
+
+    // подборки
+
+    @PostMapping("/compilations")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CompilationDto addCompilation(NewCompilationRequest request) {
+        return adminService.addCompilation(request);
     }
 
 }

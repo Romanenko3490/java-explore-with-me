@@ -10,10 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.categories.Category;
 import ru.practicum.categories.CategoryRepository;
 import ru.practicum.events.*;
-import ru.practicum.exception.DataConflictException;
-import ru.practicum.exception.EventDataException;
-import ru.practicum.exception.ForbiddenException;
-import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.*;
 import ru.practicum.requests.*;
 import ru.practicum.user.User;
 import ru.practicum.user.UserRepository;
@@ -230,18 +227,19 @@ public class PrivateService {
         }
 
         if (!event.getRequestModeration() || event.getParticipantLimit().equals(0)) {
-            throw new EventDataException("Request moderation switched off or Participant limit = 0.");
+            throw new ConflictException("Request moderation switched off or Participant limit = 0. Event have " +
+                    event.getConfirmedRequests() + " confirmed requests.");
         }
 
         if (event.getConfirmedRequests() >= event.getParticipantLimit()) {
-            throw new EventDataException("Participant limit exceeded");
+            throw new ConflictException("Participant limit exceeded");
         }
 
         List<Request> requests = requestsRepository.findByIdIn(request.getRequestIds());
 
 
         if (requests.stream().anyMatch(req -> !req.getStatus().equals(RequestStatus.PENDING))) {
-            throw new EventDataException("All requests must have status PENDING");
+            throw new ConflictException("All requests must have status PENDING");
         }
 
         List<RequestDto> confirmed = new ArrayList<>();

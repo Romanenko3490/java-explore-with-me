@@ -5,9 +5,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.categories.Category;
+import ru.practicum.compilations.Compilation;
 import ru.practicum.user.User;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -73,4 +76,11 @@ public class Event {
     private Integer confirmedRequests;
 
     private Long views = 0L;
+
+
+    @ManyToMany(mappedBy = "events", fetch = FetchType.LAZY)
+    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Compilation> compilations = new HashSet<>();
 }

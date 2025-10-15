@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import ru.practicum.base.BaseWebClient;
-import ru.practicum.exception.DataConflictException;
-import ru.practicum.exception.EventDataException;
-import ru.practicum.exception.ForbiddenException;
-import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.*;
 import ru.practicum.requests.EventRequestStatusUpdateRequest;
 import ru.practicum.requests.EventRequestStatusUpdateResult;
 import ru.practicum.requests.RequestDto;
@@ -120,7 +117,7 @@ public class PrivateWebRequestsClient extends BaseWebClient {
             if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
                 throw new NotFoundException(ex.getResponseBodyAsString());
             } if (ex.getStatusCode() == HttpStatus.CONFLICT) {
-                throw new EventDataException(ex.getResponseBodyAsString());
+                throw new ConflictException(ex.getResponseBodyAsString());
             }
             throw ex;
         }

@@ -11,6 +11,8 @@ import reactor.core.publisher.Mono;
 import ru.practicum.categories.CategoryDto;
 import ru.practicum.categories.NewCategoryRequest;
 import ru.practicum.categories.UpdateCategoryRequest;
+import ru.practicum.compilations.CompilationDto;
+import ru.practicum.compilations.NewCompilationRequest;
 import ru.practicum.events.EventDto;
 import ru.practicum.events.UpdateEventRequest;
 import ru.practicum.user.UserDto;
@@ -28,6 +30,7 @@ public class AdminController {
     private final AdminWebUserClient adminUserClient;
     private final AdminWebCategoriesClient adminCategoriesClient;
     private final AdminWebEventClient adminWebEventClient;
+    private final AdminCompilationClient adminCompilationClient;
 
     //Users
 
@@ -109,6 +112,16 @@ public class AdminController {
             @RequestBody UpdateEventRequest request) {
         return adminWebEventClient.updateEvent(eventId, request);
     }
+
+    //Admin: Подборки событий
+    //API для работы с подборками событий
+
+    @PostMapping("/compilations")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CompilationDto addCompilation(NewCompilationRequest request) {
+        return adminCompilationClient.addCompilation(request);
+    }
+
 
 
 }

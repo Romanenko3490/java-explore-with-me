@@ -5,13 +5,13 @@ import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import ru.practicum.events.EventDto;
 
-import java.util.Set;
+import java.util.List;
 
 @Value
 @Jacksonized
 @Builder
 public class CompilationDto {
-    Set<EventDto> events;
+    List<EventDto> events;
     Long id;
     Boolean pinned;
     String title;

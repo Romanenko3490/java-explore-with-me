@@ -2,26 +2,31 @@ package ru.practicum.events;
 
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
+
     List<Event> findByInitiatorId(Long userId, Pageable pageable);
 
     boolean existsByCategory_Id(Long categoryId);
 
-    default List<Event> findByFilters(List<Long> users,
-                                      List<EventState> states,
-                                      List<Long> categories,
-                                      LocalDateTime rangeStart,
-                                      LocalDateTime rangeEnd,
-                                      Pageable pageable) {
+    default List<Event> findByAdminFilters(List<Long> users,
+                                           List<EventState> states,
+                                           List<Long> categories,
+                                           LocalDateTime rangeStart,
+                                           LocalDateTime rangeEnd,
+                                           Pageable pageable) {
 
         QEvent event = QEvent.event;
         BooleanBuilder predicate = new BooleanBuilder();
@@ -49,5 +54,69 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
         return findAll(predicate, pageable).getContent();
     }
 
-    Set<Event> findByIdIn(Collection<Long> ids);
+    List<Event> findByIdIn(Collection<Long> ids);
+
+
+    default List<Event> findByPublicFilters(String text,
+                                            List<Long> categories,
+                                            Boolean paid,
+                                            LocalDateTime rangeStart,
+                                            LocalDateTime rangeEnd,
+                                            Boolean onlyAvailable,
+                                            EventSortType sort,
+                                            Integer from,
+                                            Integer size
+    ) {
+        QEvent event = QEvent.event;
+        BooleanBuilder predicate = new BooleanBuilder();
+
+
+        predicate.and(event.state.eq(EventState.PUBLISHED));
+
+        if (text != null && !text.isBlank()) {
+            String searchText = text.toLowerCase();
+            BooleanBuilder textPredicate = new BooleanBuilder();
+            textPredicate.or(event.annotation.toLowerCase().contains(searchText))
+                    .or(event.title.toLowerCase().contains(searchText))
+                    .or(event.description.toLowerCase().contains(searchText));
+            predicate.and(textPredicate);
+        }
+
+        if (categories != null && !categories.isEmpty()) {
+            predicate.and(event.category.id.in(categories));
+        }
+
+        if (paid != null) {
+            predicate.and(event.paid.eq(paid));
+        }
+
+        if (rangeStart != null) {
+            predicate.and(event.eventDate.goe(rangeStart));
+        }
+
+        if (rangeEnd != null) {
+            predicate.and(event.eventDate.loe(rangeEnd));
+        }
+
+        if (onlyAvailable != null) {
+            predicate.and(event.confirmedRequests.lt(event.participantLimit))
+                    .or(event.participantLimit.eq(0));
+        }
+
+        if (rangeStart == null && rangeEnd == null) {
+            predicate.and(event.eventDate.goe(LocalDateTime.now()));
+        }
+
+
+        Sort sortObj;
+        switch (sort) {
+            case VIEWS -> sortObj = Sort.by(Sort.Direction.DESC, "views");
+            case EVENT_DATE -> sortObj = Sort.by(Sort.Direction.ASC, "eventDate");
+            default -> sortObj = Sort.by(Sort.Direction.ASC, "eventDate");
+        }
+
+        Pageable pageable = PageRequest.of(from/size, size, sortObj);
+
+        return findAll(predicate, pageable).getContent();
+    }
 }

@@ -34,14 +34,14 @@ public class PublicWebClientCategories extends BaseWebClient {
 
     }
 
-    public CategoryDto getCategory(Integer catId) {
+    public CategoryDto getCategory(Long catId) {
         return webClient.get()
                 .uri("/" + catId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(status -> status == HttpStatus.NOT_FOUND,
                         response -> {
-                    throw  new NotFoundException("Category with id " + catId + " not found");
+                    throw  new NotFoundException("Category with id=" + catId + " was not found");
                         })
                 .bodyToMono(CategoryDto.class)
                 .block();

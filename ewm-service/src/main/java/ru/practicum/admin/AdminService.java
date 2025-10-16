@@ -18,8 +18,8 @@ import ru.practicum.user.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -157,7 +157,7 @@ public class AdminService {
 
         Pageable pageable = PageRequest.of(from / size, size);
 
-        List<Event> eventList = eventRepository.findByFilters(users,
+        List<Event> eventList = eventRepository.findByAdminFilters(users,
                 eventStates,
                 categories,
                 rangeStart,
@@ -276,17 +276,16 @@ public class AdminService {
                     " could not execute statement");
         }
 
-        Set<Event> events = eventRepository.findByIdIn(request.getEvents());
-        log.info("Found {} events", events.size());
+        List<Event> events;
 
-        if (events.size() != request.getEvents().size()) {
-            Set<Long> foundEventIds = events.stream()
-                    .map(Event::getId)
-                    .collect(Collectors.toSet());
-            Set<Long> missingEventIds = request.getEvents().stream()
-                    .filter(id -> !foundEventIds.contains(id))
-                    .collect(Collectors.toSet());
-            log.info("Some events not found: {}", missingEventIds);
+        if (request.getEvents() != null) {
+            events = eventRepository.findByIdIn(request.getEvents());
+            log.info("Found {} events", events.size());
+
+            logMissedIds(events, request);
+
+        } else {
+            events = Collections.emptyList();
         }
 
         Compilation compilation = compilationsRepository.save(Compilation.builder()
@@ -300,4 +299,79 @@ public class AdminService {
         return compilationsMapper.toDto(compilation);
     }
 
+    private void logMissedIds(List<Event> events, Requestable request) {
+        if (events.size() != request.getEvents().size()) {
+            Set<Long> foundEventIds = events.stream()
+                    .map(Event::getId)
+                    .collect(Collectors.toSet());
+            Set<Long> missingEventIds = request.getEvents().stream()
+                    .filter(id -> !foundEventIds.contains(id))
+                    .collect(Collectors.toSet());
+            log.info("Some events not found: {}", missingEventIds);
+        }
+    }
+
+
+    public void deleteCompilation(Long compId) {
+
+        if (!compilationsRepository.existsById(compId)) {
+            throw new NotFoundException("Compilation with id=" + compId + " was not found");
+        }
+
+        compilationsRepository.deleteById(compId);
+    }
+
+    public CompilationDto getCompilation(Long compId) {
+        Compilation compilation = compilationsRepository.findById(compId).orElseThrow(
+                () -> new NotFoundException("Compilation with id=" + compId + " was not found")
+        );
+        return compilationsMapper.toDto(compilation);
+    }
+
+    public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest request) {
+        log.info("update compilation {}", request);
+
+        if (compilationsRepository.existsByTitle(request.getTitle())) {
+            throw new DataConflictException("could not execute statement; " +
+                    "SQL [n/a]; constraint" + request.getTitle() +
+                    "; nested exception is org.hibernate.exception.ConstraintViolationException:" +
+                    " could not execute statement");
+        }
+
+        Compilation compilation = compilationsRepository.findById(compId).orElseThrow(
+                () -> new NotFoundException("Compilation with id=" + compId + " was not found")
+        );
+
+        if (request.hasEvents()) {
+            List<Event> events = eventRepository.findByIdIn(request.getEvents());
+            logMissedIds(events, request);
+            events = sortEventsByRequestOrder(events, request.getEvents());
+            compilation.setEvents(events);
+        } else {
+            compilation.setEvents(Collections.emptyList());
+        }
+
+        if (request.hasPinned()) {
+            compilation.setPinned(request.getPinned());
+        }
+
+        if (request.hasTitle()) {
+            compilation.setTitle(request.getTitle());
+        }
+
+        compilation = compilationsRepository.save(compilation);
+        return compilationsMapper.toDto(compilation);
+    }
+
+
+    private List<Event> sortEventsByRequestOrder(List<Event> events, List<Long> requestedOrder) {
+
+        Map<Long, Event> eventMap = events.stream()
+                .collect(Collectors.toMap(Event::getId, Function.identity()));
+
+        return requestedOrder.stream()
+                .map(eventMap::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 }

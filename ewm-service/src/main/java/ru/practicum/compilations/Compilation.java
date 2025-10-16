@@ -3,9 +3,10 @@ package ru.practicum.compilations;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.events.Event;
-import ru.practicum.events.EventState;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -38,7 +39,7 @@ public class Compilation {
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
     @Builder.Default
-    private Set<Event> events = new HashSet<>();
+    private List<Event> events = new ArrayList<>();
 
 
     public void addEvent(Event event) {

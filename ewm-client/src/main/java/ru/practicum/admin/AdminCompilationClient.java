@@ -9,7 +9,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import ru.practicum.base.BaseWebClient;
 import ru.practicum.compilations.CompilationDto;
 import ru.practicum.compilations.NewCompilationRequest;
+import ru.practicum.compilations.UpdateCompilationRequest;
 import ru.practicum.exception.DataConflictException;
+import ru.practicum.exception.NotFoundException;
 
 
 @Service
@@ -40,5 +42,58 @@ public class AdminCompilationClient extends BaseWebClient {
             }
             throw ex;
         }
+    }
+
+    public void deleteCompilation(Long compId) {
+        webClient.delete()
+                .uri("/" + compId)
+                .retrieve()
+                .onStatus(status -> status == HttpStatus.NOT_FOUND,
+                        response -> {
+                            throw new NotFoundException("Compilation with id=" + compId + " was not found");
+                        })
+                .toBodilessEntity()
+                .doOnSuccess(response -> {
+                    log.info("Deleted compilation: {}", response);
+                })
+                .block();
+
+    }
+
+    public CompilationDto getCompilation(Long compId) {
+        return webClient.get()
+                .uri("/" + compId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(status -> status == HttpStatus.NOT_FOUND,
+                        response -> {
+                            throw new NotFoundException("Compilation with id=" + compId + " was not found");
+                        })
+                .bodyToMono(CompilationDto.class)
+                .block();
+    }
+
+    public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest request) {
+        return webClient.patch()
+                .uri("/" + compId)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(status -> status == HttpStatus.NOT_FOUND,
+                        response -> {
+                            throw new NotFoundException("Compilation with id=" + compId + " was not found");
+                        })
+                .onStatus(status -> status == HttpStatus.CONFLICT,
+                        response -> {
+                    throw new DataConflictException("could not execute statement; " +
+                            "SQL [n/a]; constraint" + request.getTitle() +
+                            "; nested exception is org.hibernate.exception.ConstraintViolationException:" +
+                            " could not execute statement");
+                        })
+                .bodyToMono(CompilationDto.class)
+                .doOnSuccess(response -> {
+                    log.info("Updated compilation: {}", response);
+                })
+                .block();
     }
 }

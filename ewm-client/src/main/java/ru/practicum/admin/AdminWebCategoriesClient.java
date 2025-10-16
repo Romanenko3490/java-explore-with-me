@@ -55,7 +55,7 @@ public class AdminWebCategoriesClient extends BaseWebClient {
                     .block();
         } catch (WebClientResponseException ex) {
             if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new NotFoundException("Category with id=" + id + " not found");
+                throw new NotFoundException("Category with id=" + id + " was not found");
             } else if (ex.getStatusCode() == HttpStatus.CONFLICT) {
                 throw new CategoryConflictException("The category is not empty");
             }
@@ -78,9 +78,9 @@ public class AdminWebCategoriesClient extends BaseWebClient {
                     .block();
         } catch (WebClientResponseException ex) {
             if (ex.getStatusCode() == HttpStatus.CONFLICT) {
-                throw new DataConflictException("Conflict from service: " + ex.getResponseBodyAsString());
+                throw new DataConflictException(ex.getResponseBodyAsString());
             } else if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new NotFoundException("Not found from service: " + ex.getResponseBodyAsString());
+                throw new NotFoundException(ex.getResponseBodyAsString());
             }
             throw ex;
         }

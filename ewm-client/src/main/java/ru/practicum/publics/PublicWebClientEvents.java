@@ -1,17 +1,23 @@
 package ru.practicum.publics;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.practicum.base.BaseWebClient;
 import ru.practicum.events.EventDto;
+import ru.practicum.events.EventSortType;
+import ru.practicum.exception.EventDataException;
 import ru.practicum.exception.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Service
+@Slf4j
 public class PublicWebClientEvents extends BaseWebClient {
     private final static String EVENT_API = "/events";
 
@@ -26,7 +32,7 @@ public class PublicWebClientEvents extends BaseWebClient {
             LocalDateTime rangeStart,
             LocalDateTime rangeEnd,
             Boolean onlyAvailable,
-            String sort,
+            EventSortType sort,
             Integer from,
             Integer size
 
@@ -57,7 +63,11 @@ public class PublicWebClientEvents extends BaseWebClient {
                 .retrieve()
                 .onStatus(status -> status == HttpStatus.NOT_FOUND,
                         response -> {
-                            throw new NotFoundException("Event with id " + id + " not found");
+                            throw new NotFoundException("Event with id=" + id + " was not found");
+                        })
+                .onStatus(status -> status == HttpStatus.CONFLICT,
+                        response -> {
+                            throw new EventDataException("Event with id=" + id + " was not published");
                         })
                 .bodyToMono(EventDto.class)
                 .block();

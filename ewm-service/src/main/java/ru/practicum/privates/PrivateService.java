@@ -36,11 +36,11 @@ public class PrivateService {
     public EventDto addEvent(Long userId, NewEventRequest request) {
         log.info("Adding event {}", request);
         User initiator = userRepository.findById(userId).orElseThrow(
-                () -> new NotFoundException("User not found with id=" + userId)
+                () -> new NotFoundException("User with id=" + userId + "  was not found")
         );
 
         Category category = categoryRepository.findById(request.getCategory()).orElseThrow(
-                () -> new NotFoundException("Category not found with id=" + request.getCategory())
+                () -> new NotFoundException("Category with id=" + request.getCategory() + " was not found")
         );
 
         Location location = Location.builder()
@@ -81,7 +81,7 @@ public class PrivateService {
     public EventDto getEvent(Long userId, Long eventId) {
         log.info("Getting event {}", eventId);
         if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User not found with id=" + userId);
+            throw new NotFoundException("User with id=" + userId + " was not found");
         }
 
         Event event = eventRepository.findById(eventId).orElseThrow(
@@ -276,14 +276,14 @@ public class PrivateService {
         log.info("Adding request from user {}, to event {}", userId, eventId);
 
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new NotFoundException("User with id=" + userId + " not found"));
+                () -> new NotFoundException("User with id=" + userId + " was not found"));
 
         if (requestsRepository.existsByRequesterIdAndEventId(userId, eventId)) {
             throw new DataConflictException("Event: " + eventId + " already contain request from user: " + userId);
         }
 
         Event event = eventRepository.findById(eventId).orElseThrow(
-                () -> new NotFoundException("Event with id=" + eventId + " not found")
+                () -> new NotFoundException("Event with id=" + eventId + " was not found")
         );
 
         //409 инициатор события не может добавить запрос на участие в своем событии
@@ -321,7 +321,7 @@ public class PrivateService {
     public List<RequestDto> getUserRequests(Long userId) {
         log.info("Get requests for events from user {}", userId);
         if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User with id=" + userId + " not found");
+            throw new NotFoundException("User with id=" + userId + " was not found");
         }
 
         List<Request> requests = requestsRepository.findByRequester_Id(userId);
@@ -335,11 +335,11 @@ public class PrivateService {
         log.info("Canceling request from user {}, to request {}", userId, requestId);
 
         if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User with id=" + userId + " not found");
+            throw new NotFoundException("User with id=" + userId + " was not found");
         }
 
         Request request = requestsRepository.findById(requestId).orElseThrow(
-                () -> new NotFoundException("Request with id=" + requestId + " not found")
+                () -> new NotFoundException("Request with id=" + requestId + " was not found")
         );
 
         if (!request.getRequester().getId().equals(userId)) {
@@ -348,7 +348,7 @@ public class PrivateService {
         }
 
         Event event = eventRepository.findById(request.getEvent().getId()).orElseThrow(
-                () -> new NotFoundException("Event for request with id=" + requestId + " not found")
+                () -> new NotFoundException("Event for request with id=" + requestId + " was not found")
         );
 
         if (request.getStatus() == RequestStatus.CONFIRMED) {

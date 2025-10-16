@@ -1,6 +1,8 @@
 package ru.practicum.admin;
 
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import ru.practicum.categories.NewCategoryRequest;
 import ru.practicum.categories.UpdateCategoryRequest;
 import ru.practicum.compilations.CompilationDto;
 import ru.practicum.compilations.NewCompilationRequest;
+import ru.practicum.compilations.UpdateCompilationRequest;
 import ru.practicum.events.EventDto;
 import ru.practicum.events.UpdateEventRequest;
 import ru.practicum.user.UserRequest;
@@ -103,8 +106,25 @@ public class AdminInternalController {
 
     @PostMapping("/compilations")
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto addCompilation(NewCompilationRequest request) {
+    public CompilationDto addCompilation(@RequestBody NewCompilationRequest request) {
         return adminService.addCompilation(request);
+    }
+
+    @DeleteMapping("/compilations/{compId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCompilation(@PathVariable Long compId) {
+        adminService.deleteCompilation(compId);
+    }
+
+    @GetMapping("/compilations/{compId}")
+    public CompilationDto getCompilation(@PathVariable Long compId) {
+        return adminService.getCompilation(compId);
+    }
+
+    @PatchMapping("/compilations/{compId}")
+    public CompilationDto updateCompilation( @PathVariable Long compId,
+                                             @RequestBody UpdateCompilationRequest request) {
+        return adminService.updateCompilation(compId ,request);
     }
 
 }

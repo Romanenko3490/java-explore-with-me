@@ -3,6 +3,7 @@ package ru.practicum.admin;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +14,7 @@ import ru.practicum.categories.NewCategoryRequest;
 import ru.practicum.categories.UpdateCategoryRequest;
 import ru.practicum.compilations.CompilationDto;
 import ru.practicum.compilations.NewCompilationRequest;
+import ru.practicum.compilations.UpdateCompilationRequest;
 import ru.practicum.events.EventDto;
 import ru.practicum.events.UpdateEventRequest;
 import ru.practicum.user.UserDto;
@@ -118,10 +120,26 @@ public class AdminController {
 
     @PostMapping("/compilations")
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto addCompilation(NewCompilationRequest request) {
+    public CompilationDto addCompilation(@RequestBody NewCompilationRequest request) {
         return adminCompilationClient.addCompilation(request);
     }
 
+    @DeleteMapping("/compilations/{compId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeCompilation(@PathVariable @Min(1) Long compId) {
+        adminCompilationClient.deleteCompilation(compId);
+    }
+
+    @GetMapping("/compilations/{compId}")
+    public CompilationDto getCompilation(@PathVariable @Min(1) Long compId) {
+        return adminCompilationClient.getCompilation(compId);
+    }
+
+    @PatchMapping("/compilations/{compId}")
+    public CompilationDto updateCompilation( @PathVariable @Min(1) Long compId,
+            @RequestBody @Valid UpdateCompilationRequest request) {
+        return adminCompilationClient.updateCompilation(compId ,request);
+    }
 
 
 }

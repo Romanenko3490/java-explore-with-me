@@ -74,7 +74,7 @@ public class PrivateWebEventsClient extends BaseWebClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(status -> status == HttpStatus.NOT_FOUND, response -> {
-                    throw new NotFoundException("User with id " + userId + " not found");
+                    throw new NotFoundException("User with id=" + userId + " was not found");
                 })
                 .bodyToFlux(EventDto.class)
                 .collectList();

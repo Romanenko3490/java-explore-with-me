@@ -34,14 +34,14 @@ public class PublicWebClientCompilations extends BaseWebClient {
                 .collectList();
     }
 
-    public CompilationDto getCompilationById(Integer compId) {
+    public CompilationDto getCompilationById(Long compId) {
         return webClient.get()
                 .uri("/" + compId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(status ->  status == HttpStatus.NOT_FOUND,
                         response -> {
-                    throw new NotFoundException("Compilation with id " + compId + " not found");
+                    throw new NotFoundException("Compilation with id=" + compId + " was not found");
                         })
                 .bodyToMono(CompilationDto.class)
                 .block();

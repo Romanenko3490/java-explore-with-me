@@ -20,7 +20,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class AdminWebEventClient extends BaseWebClient {
-    public static final String API_PREFIX_EVENT = "/admin/events";
+    private static final String API_PREFIX_EVENT = "/admin/events";
 
     public AdminWebEventClient(@Value("${ewm-service.url}") String baseUrl) {
         super(baseUrl, API_PREFIX_EVENT);

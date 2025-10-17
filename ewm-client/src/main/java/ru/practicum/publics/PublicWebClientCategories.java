@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 @Slf4j
 public class PublicWebClientCategories extends BaseWebClient {
-    private final static String CATEGORIES_API = "/categories";
+    private static final String CATEGORIES_API = "/categories";
 
     public PublicWebClientCategories(@Value("${ewm-service.url}") String baseUrl) {
         super(baseUrl, CATEGORIES_API);

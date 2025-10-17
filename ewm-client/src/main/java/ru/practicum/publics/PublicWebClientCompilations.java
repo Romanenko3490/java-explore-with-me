@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 @Slf4j
 public class PublicWebClientCompilations extends BaseWebClient {
-    private final static String COMP_API = "/compilations";
+    private static final String COMP_API = "/compilations";
 
     public PublicWebClientCompilations(@Value("${ewm-service.url}") String baseUrl) {
         super(baseUrl, COMP_API);

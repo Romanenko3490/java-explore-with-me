@@ -19,7 +19,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class PublicWebClientEvents extends BaseWebClient {
-    private final static String EVENT_API = "/events";
+    private static final String EVENT_API = "/events";
 
     public PublicWebClientEvents(@Value("${ewm-service.url}") String baseUrl) {
         super(baseUrl, EVENT_API);

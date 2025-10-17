@@ -85,10 +85,10 @@ public class AdminCompilationClient extends BaseWebClient {
                         })
                 .onStatus(status -> status == HttpStatus.CONFLICT,
                         response -> {
-                    throw new DataConflictException("could not execute statement; " +
-                            "SQL [n/a]; constraint" + request.getTitle() +
-                            "; nested exception is org.hibernate.exception.ConstraintViolationException:" +
-                            " could not execute statement");
+                            throw new DataConflictException("could not execute statement; " +
+                                    "SQL [n/a]; constraint" + request.getTitle() +
+                                    "; nested exception is org.hibernate.exception.ConstraintViolationException:" +
+                                    " could not execute statement");
                         })
                 .bodyToMono(CompilationDto.class)
                 .doOnSuccess(response -> {

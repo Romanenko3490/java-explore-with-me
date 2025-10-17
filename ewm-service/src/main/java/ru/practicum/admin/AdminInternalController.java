@@ -1,8 +1,6 @@
 package ru.practicum.admin;
 
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,8 +13,8 @@ import ru.practicum.compilations.NewCompilationRequest;
 import ru.practicum.compilations.UpdateCompilationRequest;
 import ru.practicum.events.EventDto;
 import ru.practicum.events.UpdateEventRequest;
-import ru.practicum.user.UserRequest;
 import ru.practicum.user.UserDto;
+import ru.practicum.user.UserRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -122,9 +120,9 @@ public class AdminInternalController {
     }
 
     @PatchMapping("/compilations/{compId}")
-    public CompilationDto updateCompilation( @PathVariable Long compId,
-                                             @RequestBody UpdateCompilationRequest request) {
-        return adminService.updateCompilation(compId ,request);
+    public CompilationDto updateCompilation(@PathVariable Long compId,
+                                            @RequestBody UpdateCompilationRequest request) {
+        return adminService.updateCompilation(compId, request);
     }
 
 }

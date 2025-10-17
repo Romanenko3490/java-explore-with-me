@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -65,7 +64,7 @@ public class AdminWebUserClient extends BaseWebClient {
                     .block();
         } catch (WebClientResponseException ex) {
             if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw  new NotFoundException("User with id=" + id + " was not found");
+                throw new NotFoundException("User with id=" + id + " was not found");
             }
             throw ex;
         }

@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import ru.practicum.base.BaseWebClient;
-import ru.practicum.exception.*;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.DataConflictException;
+import ru.practicum.exception.ForbiddenException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.requests.EventRequestStatusUpdateRequest;
 import ru.practicum.requests.EventRequestStatusUpdateResult;
 import ru.practicum.requests.RequestDto;
@@ -55,7 +58,7 @@ public class PrivateWebRequestsClient extends BaseWebClient {
                 .uri("/" + userId + "/requests")
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(status -> status ==  HttpStatus.NOT_FOUND, response -> {
+                .onStatus(status -> status == HttpStatus.NOT_FOUND, response -> {
                     throw new NotFoundException("User with id=" + userId + " was not found");
                 })
                 .bodyToFlux(RequestDto.class)
@@ -116,7 +119,8 @@ public class PrivateWebRequestsClient extends BaseWebClient {
         } catch (WebClientResponseException ex) {
             if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
                 throw new NotFoundException(ex.getResponseBodyAsString());
-            } if (ex.getStatusCode() == HttpStatus.CONFLICT) {
+            }
+            if (ex.getStatusCode() == HttpStatus.CONFLICT) {
                 throw new ConflictException(ex.getResponseBodyAsString());
             }
             throw ex;

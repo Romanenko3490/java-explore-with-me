@@ -1,6 +1,5 @@
 package ru.practicum.publics;
 
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -89,7 +88,6 @@ public class PublicInternalController {
                              @RequestHeader("X-Client-IP") String clientIp) {
         return publicService.getEvent(id, clientIp);
     }
-
 
 
 }

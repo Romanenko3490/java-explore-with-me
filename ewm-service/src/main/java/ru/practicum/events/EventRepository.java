@@ -2,9 +2,6 @@ package ru.practicum.events;
 
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -107,7 +104,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
             predicate.and(event.eventDate.goe(LocalDateTime.now()));
         }
 
-        if  (sort == null) {
+        if (sort == null) {
             sort = EventSortType.EVENT_DATE;
         }
 
@@ -118,7 +115,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
             case EVENT_DATE -> sortObj = Sort.by(Sort.Direction.ASC, "eventDate");
         }
 
-        Pageable pageable = PageRequest.of(from/size, size, sortObj);
+        Pageable pageable = PageRequest.of(from / size, size, sortObj);
 
         return findAll(predicate, pageable).getContent();
     }

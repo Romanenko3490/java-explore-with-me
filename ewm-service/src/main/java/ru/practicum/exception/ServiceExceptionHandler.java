@@ -33,7 +33,7 @@ public class ServiceExceptionHandler {
 
     @ExceptionHandler(CategoryConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public  String handleCategoryConflictException(CategoryConflictException ex) {
+    public String handleCategoryConflictException(CategoryConflictException ex) {
         log.warn("Category conflict in service: {}", ex.getMessage());
         return ex.getMessage();
     }

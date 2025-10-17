@@ -34,7 +34,7 @@ public class AdminService {
 
     private final UserMapper userMapper;
     private final CategoryMapper categoryMapper;
-    private  final EventMapper eventMapper;
+    private final EventMapper eventMapper;
     private final CompilationsMapper compilationsMapper;
 
     //Users
@@ -287,7 +287,6 @@ public class AdminService {
         } else {
             events = Collections.emptyList();
         }
-
 
 
         Compilation compilation = compilationsRepository.save(Compilation.builder()

@@ -9,6 +9,5 @@ public interface CompilationsMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "pinned", target = "pinned")
     @Mapping(source = "title", target = "title")
-
     CompilationDto toDto(Compilation compilation);
 }

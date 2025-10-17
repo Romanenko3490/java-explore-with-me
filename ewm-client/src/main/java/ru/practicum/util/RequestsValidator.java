@@ -40,7 +40,6 @@ public class RequestsValidator {
     }
 
 
-
     public static void validateEmail(String email) {
         if (email == null || email.isEmpty()) {
             throw new EmailValidationException("Field: email. Error: must not be empty. Value: null");

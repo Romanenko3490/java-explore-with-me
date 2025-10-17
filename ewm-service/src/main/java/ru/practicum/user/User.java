@@ -1,4 +1,5 @@
 package ru.practicum.user;
+
 import jakarta.persistence.*;
 import lombok.*;
 

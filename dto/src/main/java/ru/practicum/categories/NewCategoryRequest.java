@@ -12,6 +12,6 @@ import lombok.extern.jackson.Jacksonized;
 public class NewCategoryRequest {
 
     @NotBlank
-            @Size(min = 1, max = 50)
+    @Size(min = 1, max = 50)
     String name;
 }

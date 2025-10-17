@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import reactor.core.publisher.Mono;
 import ru.practicum.base.BaseWebClient;
 import ru.practicum.compilations.CompilationDto;
@@ -39,9 +38,9 @@ public class PublicWebClientCompilations extends BaseWebClient {
                 .uri("/" + compId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(status ->  status == HttpStatus.NOT_FOUND,
+                .onStatus(status -> status == HttpStatus.NOT_FOUND,
                         response -> {
-                    throw new NotFoundException("Compilation with id=" + compId + " was not found");
+                            throw new NotFoundException("Compilation with id=" + compId + " was not found");
                         })
                 .bodyToMono(CompilationDto.class)
                 .block();

@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.events.Event;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "compilations")

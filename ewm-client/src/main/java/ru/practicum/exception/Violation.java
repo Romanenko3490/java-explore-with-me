@@ -2,7 +2,6 @@ package ru.practicum.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
@@ -20,5 +19,5 @@ public class Violation {
     String message;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime timestamp =  LocalDateTime.now();
+    LocalDateTime timestamp = LocalDateTime.now();
 }

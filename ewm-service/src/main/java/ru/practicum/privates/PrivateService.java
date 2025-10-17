@@ -113,7 +113,7 @@ public class PrivateService {
                 () -> new NotFoundException("Event with id=" + eventId + " was not found")
         );
 
-        if (event.getInitiator().getId() != userId) {
+        if (!event.getInitiator().getId().equals(userId)) {
             throw new ForbiddenException(
                     String.format("User with id=%d is not allowed to update event with id=%d", userId, eventId));
         }
@@ -287,7 +287,7 @@ public class PrivateService {
             throw new DataConflictException("Owner of event can not perform request");
         }
         //409 нельзя учавствовать в неопубликованном событии
-        if (event.getState() != EventState.PUBLISHED) {
+        if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new DataConflictException("Event is not published");
         }
         //409 если у события достигнут лимит запросов

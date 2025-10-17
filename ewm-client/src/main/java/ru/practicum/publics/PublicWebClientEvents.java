@@ -34,8 +34,8 @@ public class PublicWebClientEvents extends BaseWebClient {
             Boolean onlyAvailable,
             EventSortType sort,
             Integer from,
-            Integer size
-
+            Integer size,
+            String clientIp
     ) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -49,6 +49,7 @@ public class PublicWebClientEvents extends BaseWebClient {
                         .queryParam("from", from)
                         .queryParam("size", size)
                         .build())
+                .header("X-Client-IP", clientIp)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToFlux(EventDto.class)
@@ -56,9 +57,10 @@ public class PublicWebClientEvents extends BaseWebClient {
     }
 
 
-    public EventDto getEvent(Long id) {
+    public EventDto getEvent(Long id, String clientIp) {
         return webClient.get()
                 .uri("/" + id)
+                .header("X-Client-IP", clientIp)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(status -> status == HttpStatus.NOT_FOUND,

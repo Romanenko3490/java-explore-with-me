@@ -10,12 +10,14 @@ import ru.practicum.categories.Category;
 import ru.practicum.categories.CategoryDto;
 import ru.practicum.categories.CategoryMapper;
 import ru.practicum.categories.CategoryRepository;
+import ru.practicum.clints.StatsClient;
 import ru.practicum.compilations.Compilation;
 import ru.practicum.compilations.CompilationDto;
 import ru.practicum.compilations.CompilationsMapper;
 import ru.practicum.compilations.CompilationsRepository;
 import ru.practicum.events.*;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.hit.NewHitRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,6 +36,8 @@ public class PublicService {
     private final EventMapper eventMapper;
     private final CategoryMapper categoryMapper;
     private final CompilationsMapper compilationsMapper;
+
+    private final StatsClient statsClient;
 
     public List<CategoryDto> getCategories(Integer from, Integer size) {
         log.info("Getting categories from {} size {}", from, size);
@@ -79,7 +83,7 @@ public class PublicService {
         return compilationsMapper.toDto(compilation);
     }
 
-    public EventDto getEvent(Long id) {
+    public EventDto getEvent(Long id, String clientIp) {
         log.info("Getting event with id {}", id);
 
         Event event = eventRepository.findById(id).orElseThrow(
@@ -89,6 +93,11 @@ public class PublicService {
         if (event.getState() != EventState.PUBLISHED) {
             throw new NotFoundException("Event with id=" + id + " was not found");
         }
+
+        event.setViews(event.getViews() + 1);
+        eventRepository.save(event);
+        sendHitToStats(clientIp, "/events/" + id);
+
 
         return eventMapper.toDto(event);
     }
@@ -102,7 +111,7 @@ public class PublicService {
                                     Boolean onlyAvailable,
                                     EventSortType sort,
                                     Integer from,
-                                    Integer size
+                                    Integer size, String clientIp
     ) {
         List<Event> events = eventRepository.findByPublicFilters(
                 text,
@@ -115,11 +124,29 @@ public class PublicService {
                 from,
                 size);
 
+        if (!events.isEmpty()) {
+            events.stream().forEach(event -> {
+                sendHitToStats(clientIp, "/events/" + event.getId());
+                event.setViews(event.getViews() + 1);
+                eventRepository.save(event);
+            });
+        }
+
         return events.stream()
                 .map(eventMapper::toDto)
-
                 .collect(Collectors.toList());
 
+    }
+
+    private void sendHitToStats(String clientIp, String uri) {
+        NewHitRequest hitRequest = NewHitRequest.builder()
+                .app("ewm-main-service")
+                .uri(uri)
+                .ip(clientIp)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        statsClient.addHit(hitRequest);
     }
 
 

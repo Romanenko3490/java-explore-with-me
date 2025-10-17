@@ -3,10 +3,8 @@ package ru.practicum.publics;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.categories.CategoryDto;
 import ru.practicum.compilations.CompilationDto;
 import ru.practicum.events.EventDto;
@@ -62,12 +60,15 @@ public class PublicInternalController {
             @RequestParam(required = false) String text,
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) Boolean paid,
-            @RequestParam(required = false) LocalDateTime rangeStart,
-            @RequestParam(required = false) LocalDateTime rangeEnd,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @RequestParam(required = false, defaultValue = "false") Boolean onlyAvailable,
             @RequestParam(required = false) EventSortType sort,
             @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestHeader("X-Client-IP") String clientIp
 
     ) {
         return publicService.getEvents(text,
@@ -78,13 +79,15 @@ public class PublicInternalController {
                 onlyAvailable,
                 sort,
                 from,
-                size);
+                size,
+                clientIp);
     }
 
 
     @GetMapping("/events/{id}")
-    public EventDto getEvent(@PathVariable Long id) {
-        return publicService.getEvent(id);
+    public EventDto getEvent(@PathVariable Long id,
+                             @RequestHeader("X-Client-IP") String clientIp) {
+        return publicService.getEvent(id, clientIp);
     }
 
 

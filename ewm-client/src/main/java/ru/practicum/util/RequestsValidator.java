@@ -11,7 +11,6 @@ public class RequestsValidator {
 
     public static void dateValidation(Dateable request) throws BadRequestException {
 
-
         if (request.getEventDate() == null) {
             return;
         }
@@ -26,6 +25,21 @@ public class RequestsValidator {
                     "Event date must be at least 2 hours from now. Value: " + request.getEventDate().format(formatter));
         }
     }
+
+    public static void dateValidation(LocalDateTime localDateTime) throws BadRequestException {
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if (localDateTime.isBefore(now)) {
+            throw new BadRequestException("Field: eventDate. Error: должно содержать дату," +
+                    " которая еще не наступила. Value: " + localDateTime.format(formatter));
+        } else if (!localDateTime.isAfter(now.plusHours(2))) {
+            throw new BadRequestException("Field: eventDate. Error: " +
+                    "Event date must be at least 2 hours from now. Value: " + localDateTime.format(formatter));
+        }
+    }
+
+
 
     public static void validateEmail(String email) {
         if (email == null || email.isEmpty()) {

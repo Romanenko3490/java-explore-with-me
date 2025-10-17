@@ -1,8 +1,11 @@
 package ru.practicum.publics;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import org.apache.coyote.BadRequestException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +16,7 @@ import ru.practicum.categories.CategoryDto;
 import ru.practicum.compilations.CompilationDto;
 import ru.practicum.events.EventDto;
 import ru.practicum.events.EventSortType;
+import ru.practicum.util.RequestsValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -68,14 +72,30 @@ public class PublicController {
             @RequestParam(required = false) String text,
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) Boolean paid,
-            @RequestParam(required = false) LocalDateTime rangeStart,
-            @RequestParam(required = false) LocalDateTime rangeEnd,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @RequestParam(required = false, defaultValue = "false") Boolean onlyAvailable,
             @RequestParam(required = false) EventSortType sort,
             @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest request
 
-    ) {
+    ) throws BadRequestException {
+
+        if (rangeStart != null) {
+            RequestsValidator.dateValidation(rangeStart);
+        } else {
+            rangeStart = LocalDateTime.now();
+        }
+
+        if (rangeEnd != null) {
+            RequestsValidator.dateValidation(rangeEnd);
+        }
+
+        String clientIp = request.getRemoteAddr();
+
         return publicWebClientEvents.getEvents(text,
                 categories,
                 paid,
@@ -84,13 +104,18 @@ public class PublicController {
                 onlyAvailable,
                 sort,
                 from,
-                size);
+                size,
+                clientIp);
     }
 
 
     @GetMapping("/events/{id}")
-    public EventDto getEvent(@PathVariable @Min(1) Long id) {
-        return publicWebClientEvents.getEvent(id);
+    public EventDto getEvent(@PathVariable @Min(1) Long id,
+                             HttpServletRequest request) {
+
+        String clientIp = request.getRemoteAddr();
+
+        return publicWebClientEvents.getEvent(id, clientIp);
     }
 
 

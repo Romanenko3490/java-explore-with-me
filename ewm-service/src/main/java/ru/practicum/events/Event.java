@@ -44,7 +44,7 @@ public class Event {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean paid = true;
+    private Boolean paid = false;
 
     @Column(name = "participant_limit", nullable = false)
     @Builder.Default
@@ -52,7 +52,7 @@ public class Event {
 
     @Column(name = "request_moderation", nullable = false)
     @Builder.Default
-    private Boolean requestModeration = true;  // ← обычно true по умолчанию
+    private Boolean requestModeration = true;
 
     @Column(nullable = false)
     private String title;
@@ -67,7 +67,7 @@ public class Event {
 
     @Column(name = "published_on")  // ← nullable = true (по умолчанию)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime publishedOn;  // Будет null до публикации
+    private LocalDateTime publishedOn;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

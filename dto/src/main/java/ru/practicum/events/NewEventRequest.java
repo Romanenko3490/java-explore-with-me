@@ -41,14 +41,14 @@ public class NewEventRequest implements Dateable {
     LocationDto location;
 
     @Builder.Default
-    Boolean paid = true;
+    Boolean paid = false;
 
     @PositiveOrZero
     @Builder.Default
     Integer participantLimit = 0;
 
     @Builder.Default
-    Boolean requestModeration = false;
+    Boolean requestModeration = true;
 
     @NotBlank
     @Size(min = 3, max = 120)

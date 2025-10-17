@@ -107,12 +107,15 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
             predicate.and(event.eventDate.goe(LocalDateTime.now()));
         }
 
+        if  (sort == null) {
+            sort = EventSortType.EVENT_DATE;
+        }
 
-        Sort sortObj;
+
+        Sort sortObj = null;
         switch (sort) {
             case VIEWS -> sortObj = Sort.by(Sort.Direction.DESC, "views");
             case EVENT_DATE -> sortObj = Sort.by(Sort.Direction.ASC, "eventDate");
-            default -> sortObj = Sort.by(Sort.Direction.ASC, "eventDate");
         }
 
         Pageable pageable = PageRequest.of(from/size, size, sortObj);

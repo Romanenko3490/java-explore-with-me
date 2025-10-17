@@ -52,19 +52,15 @@ public class PrivateService {
         Event event = Event.builder()
                 .annotation(request.getAnnotation())
                 .category(category)
-                .confirmedRequests(0)
                 .createdOn(LocalDateTime.now())
                 .description(request.getDescription())
                 .eventDate(request.getEventDate())
                 .location(location)
                 .paid(request.getPaid())
-                .publishedOn(null)
                 .participantLimit(request.getParticipantLimit())
                 .requestModeration(request.getRequestModeration())
                 .title(request.getTitle())
-                .state(EventState.PENDING)
                 .initiator(initiator)
-                .views(0L)
                 .build();
 
         if (event.getParticipantLimit().equals(0)) {

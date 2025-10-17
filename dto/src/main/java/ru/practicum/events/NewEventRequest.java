@@ -22,14 +22,14 @@ import java.time.LocalDateTime;
 public class NewEventRequest implements Dateable {
 
     @NotBlank
-    @Size(max = 1000)
+    @Size(min = 20, max = 2000)
     String annotation;
 
     @NotNull
     Long category;
 
     @NotBlank
-    @Size(max = 2000)
+    @Size(min = 20, max = 7000)
     String description;
 
     @NotNull
@@ -40,14 +40,15 @@ public class NewEventRequest implements Dateable {
     @Valid
     LocationDto location;
 
-    @NotNull
-    Boolean paid;
+    @Builder.Default
+    Boolean paid = true;
 
     @PositiveOrZero
-    Integer participantLimit;
+    @Builder.Default
+    Integer participantLimit = 0;
 
-    @NotNull
-    Boolean requestModeration;
+    @Builder.Default
+    Boolean requestModeration = false;
 
     @NotBlank
     @Size(min = 3, max = 120)

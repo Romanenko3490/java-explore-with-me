@@ -4,17 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.events.Event;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "compilations")
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 @Setter
 @Builder
@@ -22,10 +18,11 @@ public class Compilation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
+
     Long id;
 
     @Column(name = "pinned", nullable = false)
+    @Builder.Default
     private Boolean pinned = false;
 
     @Column(name = "title", nullable = false, length = 255, unique = true)
@@ -52,5 +49,19 @@ public class Compilation {
 
     public boolean containsEvent(Event event) {
         return events.contains(event);
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Compilation)) return false;
+        Compilation that = (Compilation) o;
+        return Objects.equals(id, that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }

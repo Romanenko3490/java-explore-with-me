@@ -139,7 +139,7 @@ public class AdminService {
     }
 
     //события
-
+    @Transactional(readOnly = true)
     public List<EventDto> getEvents(
             List<Long> users,
             List<String> states,
@@ -287,6 +287,8 @@ public class AdminService {
         } else {
             events = Collections.emptyList();
         }
+
+
 
         Compilation compilation = compilationsRepository.save(Compilation.builder()
                 .events(events)

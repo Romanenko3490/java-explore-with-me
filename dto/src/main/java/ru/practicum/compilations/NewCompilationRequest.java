@@ -3,7 +3,6 @@ package ru.practicum.compilations;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
-import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 
@@ -16,10 +15,10 @@ public class NewCompilationRequest implements Requestable {
 
     List<Long> events;
 
-    @NonNull
-    Boolean pinned;
+    @Builder.Default
+    Boolean pinned = false;
 
     @NotBlank
-    @Size(max = 255, message = "Title size excided 255 characters")
+    @Size(min = 1, max = 50, message = "Title size excided 50 characters")
     String title;
 }

@@ -3,7 +3,7 @@ package ru.practicum.admin;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import org.apache.coyote.BadRequestException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -19,6 +19,7 @@ import ru.practicum.events.EventDto;
 import ru.practicum.events.UpdateEventRequest;
 import ru.practicum.user.UserDto;
 import ru.practicum.user.UserRequest;
+import ru.practicum.util.RequestsValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,6 +42,9 @@ public class AdminController {
     public UserDto addUser(
             @Valid
             @RequestBody UserRequest request) {
+
+        RequestsValidator.validateEmail(request.getEmail());
+
         return adminUserClient.addUser(request);
     }
 
@@ -111,7 +115,10 @@ public class AdminController {
     @PatchMapping("/events/{eventId}")
     public EventDto updateEvent(
             @PathVariable Long eventId,
-            @RequestBody UpdateEventRequest request) {
+            @RequestBody @Valid UpdateEventRequest request) throws BadRequestException {
+
+        RequestsValidator.dateValidation(request);
+
         return adminWebEventClient.updateEvent(eventId, request);
     }
 
@@ -120,7 +127,7 @@ public class AdminController {
 
     @PostMapping("/compilations")
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto addCompilation(@RequestBody NewCompilationRequest request) {
+    public CompilationDto addCompilation(@RequestBody @Valid NewCompilationRequest request) {
         return adminCompilationClient.addCompilation(request);
     }
 

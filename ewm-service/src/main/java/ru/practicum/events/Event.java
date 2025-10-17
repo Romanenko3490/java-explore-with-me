@@ -1,6 +1,5 @@
 package ru.practicum.events;
 
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,12 +9,12 @@ import ru.practicum.user.User;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 @Getter
 @Setter
@@ -25,7 +24,6 @@ public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     private Long id;
 
     private String annotation;
@@ -45,13 +43,16 @@ public class Event {
     private Location location;
 
     @Column(nullable = false)
-    private Boolean paid;
+    @Builder.Default
+    private Boolean paid = true;
 
     @Column(name = "participant_limit", nullable = false)
-    private Integer participantLimit;
+    @Builder.Default
+    private Integer participantLimit = 0;
 
-    @Column(name = "request_moderation",  nullable = false)
-    private Boolean requestModeration;
+    @Column(name = "request_moderation", nullable = false)
+    @Builder.Default
+    private Boolean requestModeration = true;  // ← обычно true по умолчанию
 
     @Column(nullable = false)
     private String title;
@@ -60,27 +61,41 @@ public class Event {
     @JoinColumn(name = "initiator_id", nullable = false)
     private User initiator;
 
-    @Column(name = "created_on",  nullable = false)
+    @Column(name = "created_on", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdOn;
 
-    @Column(name = "published_on",  nullable = false)
+    @Column(name = "published_on")  // ← nullable = true (по умолчанию)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime publishedOn;
+    private LocalDateTime publishedOn;  // Будет null до публикации
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private EventState state = EventState.PENDING;
 
-    @Column(name = "confirmed_requests",  nullable = false)
-    private Integer confirmedRequests;
+    @Column(name = "confirmed_requests", nullable = false)
+    @Builder.Default
+    private Integer confirmedRequests = 0;
 
+    @Builder.Default
     private Long views = 0L;
-
 
     @ManyToMany(mappedBy = "events", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Set<Compilation> compilations = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Event)) return false;
+        Event that = (Event) o;
+        return Objects.equals(id, that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 }

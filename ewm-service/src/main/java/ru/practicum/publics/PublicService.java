@@ -1,14 +1,11 @@
 package ru.practicum.publics;
 
-import com.querydsl.core.types.OrderSpecifier;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.w3c.dom.events.EventException;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.categories.Category;
 import ru.practicum.categories.CategoryDto;
 import ru.practicum.categories.CategoryMapper;
@@ -18,7 +15,6 @@ import ru.practicum.compilations.CompilationDto;
 import ru.practicum.compilations.CompilationsMapper;
 import ru.practicum.compilations.CompilationsRepository;
 import ru.practicum.events.*;
-import ru.practicum.exception.EventDataException;
 import ru.practicum.exception.NotFoundException;
 
 import java.time.LocalDateTime;
@@ -28,6 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class PublicService {
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
@@ -82,15 +79,15 @@ public class PublicService {
         return compilationsMapper.toDto(compilation);
     }
 
-    public EventDto getEvent(Long compId) {
-        log.info("Getting event with id {}", compId);
+    public EventDto getEvent(Long id) {
+        log.info("Getting event with id {}", id);
 
-        Event event = eventRepository.findById(compId).orElseThrow(
-                () -> new NotFoundException("Event with id=" + compId + " was not found")
+        Event event = eventRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Event with id=" + id + " was not found")
         );
 
         if (event.getState() != EventState.PUBLISHED) {
-            throw new EventDataException("Event with id=" + compId + " was not published");
+            throw new NotFoundException("Event with id=" + id + " was not found");
         }
 
         return eventMapper.toDto(event);
@@ -124,9 +121,6 @@ public class PublicService {
                 .collect(Collectors.toList());
 
     }
-
-
-
 
 
 }

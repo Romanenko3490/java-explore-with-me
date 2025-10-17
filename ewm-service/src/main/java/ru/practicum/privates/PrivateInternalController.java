@@ -65,14 +65,13 @@ public class PrivateInternalController {
     }
 
     @PatchMapping("events/{eventId}/requests")
-    public EventRequestStatusUpdateResult updateEventRequestsStatus (
+    public EventRequestStatusUpdateResult updateEventRequestsStatus(
             @PathVariable Long userId,
             @PathVariable Long eventId,
             @RequestBody EventRequestStatusUpdateRequest request
     ) {
         return privateService.updateEventRequestsStatus(userId, eventId, request);
     }
-
 
 
     //Private: Запросы на участие

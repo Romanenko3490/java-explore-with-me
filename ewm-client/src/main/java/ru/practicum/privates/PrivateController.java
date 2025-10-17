@@ -5,21 +5,19 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import ru.practicum.events.Dateable;
 import ru.practicum.events.EventDto;
 import ru.practicum.events.NewEventRequest;
 import ru.practicum.events.UpdateEventRequest;
-import ru.practicum.exception.EventDataException;
 import ru.practicum.requests.EventRequestStatusUpdateRequest;
 import ru.practicum.requests.EventRequestStatusUpdateResult;
 import ru.practicum.requests.RequestDto;
+import ru.practicum.util.RequestsValidator;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -38,9 +36,9 @@ public class PrivateController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventDto addEvent(
             @PathVariable("userId") @Min(1) Long userId,
-            @RequestBody @Valid NewEventRequest request) {
+            @RequestBody @Valid NewEventRequest request) throws BadRequestException {
 
-        dateValidation(request);
+        RequestsValidator.dateValidation(request);
 
         return privateWebEventsClient.addEvent(userId, request);
     }
@@ -70,8 +68,9 @@ public class PrivateController {
             @PathVariable @Min(1) Long userId,
             @PathVariable @Min(1) Long eventId,
             @RequestBody @Valid UpdateEventRequest request
-    ) {
-        dateValidation(request);
+    ) throws BadRequestException {
+
+        RequestsValidator.dateValidation(request);
 
         return privateWebEventsClient.updateEvent(userId, eventId, request);
     }
@@ -87,15 +86,13 @@ public class PrivateController {
 
     //Изменение статуса(подтверждена, отменена) заявок на участие в событии текущего пользователя
     @PatchMapping("events/{eventId}/requests")
-    public EventRequestStatusUpdateResult updateEventRequestsStatus (
+    public EventRequestStatusUpdateResult updateEventRequestsStatus(
             @PathVariable @Min(1) Long userId,
             @PathVariable @Min(1) Long eventId,
-            @RequestBody EventRequestStatusUpdateRequest request
+            @RequestBody @Valid EventRequestStatusUpdateRequest request
     ) {
         return privateWebRequestsClient.updateEventRequestsStatus(userId, eventId, request);
     }
-
-
 
 
     //Private: Запросы на участие
@@ -125,25 +122,4 @@ public class PrivateController {
     }
 
 
-
-
-
-
-
-    private void dateValidation(Dateable request) {
-
-        if (request.getEventDate() == null) {
-            return;
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        if (request.getEventDate().isBefore(now)) {
-            throw new EventDataException("Field: eventDate. Error: должно содержать дату," +
-                    " которая еще не наступила. Value: " + request.getEventDate().format(formatter));
-        } else if (!request.getEventDate().isAfter(now.plusHours(2))) {
-            throw new EventDataException("Field: eventDate. Error: " +
-                    "Event date must be at least 2 hours from now. Value: " + request.getEventDate().format(formatter));
-        }
-    }
 }

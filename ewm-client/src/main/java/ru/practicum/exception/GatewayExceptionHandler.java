@@ -150,4 +150,16 @@ public class GatewayExceptionHandler {
         );
     }
 
+    @ExceptionHandler(EmailValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Violation handleEmailValidationException(EmailValidationException ex) {
+        log.warn("Email validation error: {}", ex.getMessage());
+
+        return new Violation(
+                HttpStatus.BAD_REQUEST,
+                "Email validation error. Local part max size=64ch domain part=63ch",
+                ex.getMessage()
+        );
+    }
+
 }

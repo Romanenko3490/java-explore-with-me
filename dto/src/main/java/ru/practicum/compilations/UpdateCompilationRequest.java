@@ -12,9 +12,10 @@ import java.util.List;
 @Jacksonized
 public class UpdateCompilationRequest implements Requestable {
     List<Long> events;
+
     Boolean pinned;
 
-    @Size(max = 255, message = "Title size excided 255 characters")
+    @Size(min = 1, max = 50, message = "Title size excided 50 characters")
     String title;
 
 

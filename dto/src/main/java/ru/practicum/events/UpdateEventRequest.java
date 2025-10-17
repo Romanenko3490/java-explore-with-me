@@ -15,12 +15,12 @@ import java.time.LocalDateTime;
 @Builder
 public class UpdateEventRequest implements Dateable {
 
-    @Size(max = 1000)
+    @Size(min = 20, max = 2000)
     String annotation;
 
     Long category;
 
-    @Size(max = 2000)
+    @Size(min = 20, max = 7000)
     String description;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

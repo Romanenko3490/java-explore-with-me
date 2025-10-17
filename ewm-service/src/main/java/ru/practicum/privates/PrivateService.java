@@ -63,10 +63,6 @@ public class PrivateService {
                 .initiator(initiator)
                 .build();
 
-        if (event.getParticipantLimit().equals(0)) {
-            event.setRequestModeration(false);
-        }
-
         Event savedEvent = eventRepository.save(event);
         log.info("Added event {}", savedEvent);
         return eventMapper.toDto(savedEvent);

@@ -126,7 +126,7 @@ public class PublicService {
 
         if (!events.isEmpty()) {
             events.stream().forEach(event -> {
-                sendHitToStats(clientIp, "/events/" + event.getId());
+                sendHitToStats(clientIp, "/events");
                 event.setViews(event.getViews() + 1);
                 eventRepository.save(event);
             });

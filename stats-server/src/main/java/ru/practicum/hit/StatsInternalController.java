@@ -1,6 +1,7 @@
 package ru.practicum.hit;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class StatsInternalController {
     private final StatsService statsService;
 
@@ -26,6 +28,11 @@ public class StatsInternalController {
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique
     ) {
+
+        log.info("URIs parameter: {}", uris);           // ← что здесь?
+        log.info("URIs class: {}", uris != null ? uris.getClass() : "null");
+        log.info("URIs size: {}", uris != null ? uris.size() : 0);
+
         return statsService.getStats(start, end, uris, unique);
     }
 

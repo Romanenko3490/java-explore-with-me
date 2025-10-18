@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriBuilder;
 import ru.practicum.base.BaseWebClient;
 import ru.practicum.hit.NewHitRequest;
 import ru.practicum.hit.ViewStatsDto;
@@ -43,14 +44,19 @@ public class StatsWebClient extends BaseWebClient {
                                        List<String> uris,
                                        boolean unique) {
         return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/stats")
-                        .queryParam("start", start)
-                        .queryParam("end", end)
-                        .queryParam("unique", unique)
-                        .queryParam("uris", uris != null && !uris.isEmpty() ?
-                                String.join(",", uris) : null)
-                        .build())
+                .uri(uriBuilder -> {
+                    UriBuilder builder = uriBuilder
+                            .path("/stats")
+                            .queryParam("start", start)
+                            .queryParam("end", end)
+                            .queryParam("unique", unique);
+
+                    // Передаем каждый URI как отдельный параметр
+                    if (uris != null && !uris.isEmpty()) {
+                        uris.forEach(uri -> builder.queryParam("uris", uri));
+                    }
+                    return builder.build();
+                })
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .bodyToFlux(ViewStatsDto.class)

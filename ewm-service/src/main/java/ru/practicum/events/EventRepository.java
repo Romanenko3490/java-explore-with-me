@@ -100,7 +100,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
                     .or(event.participantLimit.eq(0));
         }
 
-        if (rangeStart == null && rangeEnd == null) {
+        if (rangeStart == null) {
             predicate.and(event.eventDate.goe(LocalDateTime.now()));
         }
 

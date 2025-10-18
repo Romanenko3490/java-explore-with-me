@@ -85,15 +85,19 @@ public class PublicController {
 
     ) throws BadRequestException {
 
-        if (rangeStart != null) {
-            RequestsValidator.dateValidation(rangeStart);
-        } else {
-            rangeStart = LocalDateTime.now();
-        }
+//        if (rangeStart != null) {
+//            RequestsValidator.dateValidation(rangeStart);
+//        } else {
+//            rangeStart = LocalDateTime.now();
+//        }
 
-        if (rangeEnd != null) {
-            RequestsValidator.dateValidation(rangeEnd);
-        }
+//        if (rangeEnd != null) {
+//            RequestsValidator.dateValidation(rangeEnd);
+//        }
+
+//        if (rangeStart == null) {
+//            rangeStart = LocalDateTime.now();
+//        }
 
         String clientIp = request.getRemoteAddr();
 

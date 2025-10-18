@@ -14,11 +14,8 @@ import ru.practicum.hit.NewHitRequest;
 public class StatsClient {
     protected final WebClient webClient;
 
-    @Value("${stats-server.url}")
-    private String statsServiceUrl;
-
-    public StatsClient() {
-        this.webClient = WebClient.create(statsServiceUrl);
+    public StatsClient(@Value("${stats-server.url}") String statsUrl) {
+        this.webClient = WebClient.create(statsUrl);
     }
 
     public void addHit(NewHitRequest request) {
@@ -29,6 +26,12 @@ public class StatsClient {
                     .bodyValue(request)
                     .retrieve()
                     .toBodilessEntity()
+                    .doOnSuccess(response -> {
+                        log.info("Hit saved successfully");
+                    })
+                    .doOnError(throwable -> {
+                        log.error("Hit save failed : {}", throwable.getMessage());
+                    })
                     .block();
         } catch (Exception e) {
             log.error("Failed to send hit to stats service", e);

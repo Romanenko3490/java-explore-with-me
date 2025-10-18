@@ -17,7 +17,6 @@ import ru.practicum.compilations.CompilationDto;
 import ru.practicum.events.EventDto;
 import ru.practicum.events.EventShortDto;
 import ru.practicum.events.EventSortType;
-import ru.practicum.util.RequestsValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;

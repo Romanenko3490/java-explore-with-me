@@ -98,7 +98,7 @@ public class PublicController {
 //            rangeStart = LocalDateTime.now();
 //        }
 
-        if (rangeEnd.isBefore(rangeStart)) {
+        if (rangeEnd.isAfter(rangeStart)) {
             throw new BadRequestException("Range start must be before end");
         }
 

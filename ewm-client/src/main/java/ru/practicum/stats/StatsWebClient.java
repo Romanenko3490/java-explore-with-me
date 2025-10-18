@@ -1,8 +1,10 @@
 package ru.practicum.stats;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -59,6 +61,13 @@ public class StatsWebClient extends BaseWebClient {
                 })
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
+                .onStatus(status -> status == HttpStatus.BAD_REQUEST, response -> {
+                    try {
+                        throw new BadRequestException("Bad request: End date can not be before start date");
+                    } catch (BadRequestException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .bodyToFlux(ViewStatsDto.class)
                 .collectList()
                 .block();

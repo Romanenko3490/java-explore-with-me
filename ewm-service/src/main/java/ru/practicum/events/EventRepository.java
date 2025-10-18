@@ -116,7 +116,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
             case VIEWS -> sortObj = Sort.by(Sort.Direction.DESC, "views");
             case EVENT_DATE -> sortObj = Sort.by(Sort.Direction.ASC, "eventDate");
         }
-
         Pageable pageable = PageRequest.of(from / size, size, sortObj);
 
         return findAll(predicate, pageable).getContent();

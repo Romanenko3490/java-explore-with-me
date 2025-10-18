@@ -2,6 +2,7 @@ package ru.practicum.events;
 
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -95,9 +96,10 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
             predicate.and(event.eventDate.loe(rangeEnd));
         }
 
-        if (onlyAvailable != null) {
-            predicate.and(event.confirmedRequests.lt(event.participantLimit))
+        if (onlyAvailable != null && onlyAvailable) {
+            BooleanExpression availablePredicate = event.confirmedRequests.lt(event.participantLimit)
                     .or(event.participantLimit.eq(0));
+            predicate.and(availablePredicate);
         }
 
         if (rangeStart == null) {

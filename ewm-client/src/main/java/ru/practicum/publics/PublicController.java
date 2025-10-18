@@ -98,11 +98,11 @@ public class PublicController {
 //            rangeStart = LocalDateTime.now();
 //        }
 
-        if (rangeStart != null && rangeEnd != null) {
-            if (rangeEnd.isAfter(rangeStart)) {
-                throw new BadRequestException("Range start must be before end");
-            }
-        }
+//        if (rangeStart != null && rangeEnd != null) {
+//            if (rangeEnd.isAfter(rangeStart)) {
+//                throw new BadRequestException("Range start must be before end");
+//            }
+//        }
 
         String clientIp = request.getRemoteAddr();
 

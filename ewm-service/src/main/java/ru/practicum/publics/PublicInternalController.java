@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.categories.CategoryDto;
 import ru.practicum.compilations.CompilationDto;
 import ru.practicum.events.EventDto;
+import ru.practicum.events.EventShortDto;
 import ru.practicum.events.EventSortType;
 
 import java.time.LocalDateTime;
@@ -55,7 +56,7 @@ public class PublicInternalController {
     //Публичный API для работы с событиями
 
     @GetMapping("/events")
-    public List<EventDto> getEvents(
+    public List<EventShortDto> getEvents(
             @RequestParam(required = false) String text,
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) Boolean paid,

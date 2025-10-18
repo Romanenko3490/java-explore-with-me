@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import ru.practicum.categories.CategoryDto;
 import ru.practicum.compilations.CompilationDto;
 import ru.practicum.events.EventDto;
+import ru.practicum.events.EventShortDto;
 import ru.practicum.events.EventSortType;
 import ru.practicum.util.RequestsValidator;
 
@@ -68,7 +69,7 @@ public class PublicController {
     //Публичный API для работы с событиями
 
     @GetMapping("/events")
-    public Mono<List<EventDto>> getEvents(
+    public Mono<List<EventShortDto>> getEvents(
             @RequestParam(required = false) String text,
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) Boolean paid,

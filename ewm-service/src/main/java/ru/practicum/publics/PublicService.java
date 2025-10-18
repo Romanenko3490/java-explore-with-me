@@ -103,7 +103,7 @@ public class PublicService {
     }
 
 
-    public List<EventDto> getEvents(String text,
+    public List<EventShortDto> getEvents(String text,
                                     List<Long> categories,
                                     Boolean paid,
                                     LocalDateTime rangeStart,
@@ -133,7 +133,7 @@ public class PublicService {
         }
 
         return events.stream()
-                .map(eventMapper::toDto)
+                .map(eventMapper::toShortDto)
                 .collect(Collectors.toList());
 
     }

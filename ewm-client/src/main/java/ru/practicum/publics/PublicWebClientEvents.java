@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.practicum.base.BaseWebClient;
 import ru.practicum.events.EventDto;
+import ru.practicum.events.EventShortDto;
 import ru.practicum.events.EventSortType;
 import ru.practicum.exception.EventDataException;
 import ru.practicum.exception.NotFoundException;
@@ -25,7 +26,7 @@ public class PublicWebClientEvents extends BaseWebClient {
         super(baseUrl, EVENT_API);
     }
 
-    public Mono<List<EventDto>> getEvents(
+    public Mono<List<EventShortDto>> getEvents(
             String text,
             List<Long> categories,
             Boolean paid,
@@ -52,7 +53,7 @@ public class PublicWebClientEvents extends BaseWebClient {
                 .header("X-Client-IP", clientIp)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToFlux(EventDto.class)
+                .bodyToFlux(EventShortDto.class)
                 .collectList();
     }
 

@@ -1,5 +1,6 @@
 package ru.practicum.util;
 
+import lombok.experimental.UtilityClass;
 import org.apache.coyote.BadRequestException;
 import ru.practicum.events.Dateable;
 import ru.practicum.exception.EmailValidationException;
@@ -7,6 +8,7 @@ import ru.practicum.exception.EmailValidationException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@UtilityClass
 public class RequestsValidator {
 
     public static void dateValidation(Dateable request) throws BadRequestException {

@@ -6,7 +6,6 @@ import ru.practicum.events.Event;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "compilations")
@@ -16,12 +15,13 @@ import java.util.Objects;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode
 public class Compilation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    Long id;
+    private Long id;
 
     @Column(name = "pinned", nullable = false)
     @Builder.Default
@@ -53,17 +53,4 @@ public class Compilation {
         return events.contains(event);
     }
 
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Compilation)) return false;
-        Compilation that = (Compilation) o;
-        return Objects.equals(id, that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId());
-    }
 }

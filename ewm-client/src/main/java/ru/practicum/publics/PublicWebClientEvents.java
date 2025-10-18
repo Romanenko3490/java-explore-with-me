@@ -1,6 +1,5 @@
 package ru.practicum.publics;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Slf4j
 public class PublicWebClientEvents extends BaseWebClient {
     private static final String EVENT_API = "/events";
 

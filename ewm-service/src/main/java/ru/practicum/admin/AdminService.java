@@ -322,6 +322,7 @@ public class AdminService {
         compilationsRepository.deleteById(compId);
     }
 
+    @Transactional(readOnly = true)
     public CompilationDto getCompilation(Long compId) {
         Compilation compilation = compilationsRepository.findById(compId).orElseThrow(
                 () -> new NotFoundException("Compilation with id=" + compId + " was not found")

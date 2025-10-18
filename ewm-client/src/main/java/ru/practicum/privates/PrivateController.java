@@ -4,7 +4,6 @@ package ru.practicum.privates;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -23,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/users/{userId}")
 @RequiredArgsConstructor
-@Slf4j
 @Validated
 public class PrivateController {
     private final PrivateWebEventsClient privateWebEventsClient;

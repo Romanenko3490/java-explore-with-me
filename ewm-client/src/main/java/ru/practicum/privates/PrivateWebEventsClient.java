@@ -1,7 +1,6 @@
 package ru.practicum.privates;
 
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +18,6 @@ import ru.practicum.exception.NotFoundException;
 import java.util.List;
 
 @Service
-@Slf4j
 public class PrivateWebEventsClient extends BaseWebClient {
     private static final String API_PREFIX = "/users";
 

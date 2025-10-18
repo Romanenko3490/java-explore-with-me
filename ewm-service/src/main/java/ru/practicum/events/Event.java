@@ -9,7 +9,6 @@ import ru.practicum.user.User;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -20,6 +19,7 @@ import java.util.Set;
 @Setter
 @Table(name = "events")
 @Builder
+@EqualsAndHashCode
 public class Event {
 
     @Id
@@ -86,16 +86,4 @@ public class Event {
     @ToString.Exclude
     private Set<Compilation> compilations = new HashSet<>();
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Event)) return false;
-        Event that = (Event) o;
-        return Objects.equals(id, that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId());
-    }
 }

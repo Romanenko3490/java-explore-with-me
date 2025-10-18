@@ -84,25 +84,16 @@ public class PublicController {
 
     ) throws BadRequestException {
 
-//        if (rangeStart != null) {
-//            RequestsValidator.dateValidation(rangeStart);
-//        } else {
-//            rangeStart = LocalDateTime.now();
-//        }
+        //Если старт нулл, начинаем фильтрацию от сейчас
+        if (rangeStart == null) {
+            rangeStart = LocalDateTime.now();
+        }
 
-//        if (rangeEnd != null) {
-//            RequestsValidator.dateValidation(rangeEnd);
-//        }
+        if (rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
+            throw new BadRequestException("rangeEnd is before rangeStart");
+        }
 
-//        if (rangeStart == null) {
-//            rangeStart = LocalDateTime.now();
-//        }
 
-//        if (rangeStart != null && rangeEnd != null) {
-//            if (rangeEnd.isAfter(rangeStart)) {
-//                throw new BadRequestException("Range start must be before end");
-//            }
-//        }
 
         String clientIp = request.getRemoteAddr();
 

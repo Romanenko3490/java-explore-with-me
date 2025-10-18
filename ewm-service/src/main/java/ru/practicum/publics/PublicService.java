@@ -126,9 +126,11 @@ public class PublicService {
 
         if (!events.isEmpty()) {
             events.stream().forEach(event -> {
-                sendHitToStats(clientIp, "/events");
+                event.setViews(event.getViews() + 1);
+                eventRepository.save(event);
             });
         }
+        sendHitToStats(clientIp, "/events");
 
         return events.stream()
                 .map(eventMapper::toShortDto)
@@ -146,5 +148,6 @@ public class PublicService {
 
         statsClient.addHit(hitRequest);
     }
+
 
 }

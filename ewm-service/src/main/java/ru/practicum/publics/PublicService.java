@@ -147,5 +147,4 @@ public class PublicService {
         statsClient.addHit(hitRequest);
     }
 
-
 }

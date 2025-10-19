@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-public class Hit implements HitData {
+public class Hit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

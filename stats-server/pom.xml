@@ -51,6 +51,13 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+
     </dependencies>
 
 
@@ -66,6 +73,10 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

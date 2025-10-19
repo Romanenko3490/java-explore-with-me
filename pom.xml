@@ -46,6 +46,23 @@
 				<artifactId>mapstruct</artifactId>
 				<version>1.5.5.Final</version>
 			</dependency>
+			<dependency>
+				<groupId>com.querydsl</groupId>
+				<artifactId>querydsl-jpa</artifactId>
+				<classifier>jakarta</classifier>
+				<version>5.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.querydsl</groupId>
+				<artifactId>querydsl-apt</artifactId>
+				<classifier>jakarta</classifier>
+				<version>5.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.persistence</groupId>
+				<artifactId>jakarta.persistence-api</artifactId>
+				<version>3.1.0</version>
+			</dependency>
 		</dependencies>
 
 	</dependencyManagement>
@@ -58,7 +75,6 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.13.0</version>
 				</plugin>
-
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>

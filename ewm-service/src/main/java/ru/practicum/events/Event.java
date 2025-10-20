@@ -86,4 +86,8 @@ public class Event {
     @ToString.Exclude
     private Set<Compilation> compilations = new HashSet<>();
 
+    @Column(name = "comments_disabled")
+    @Builder.Default
+    private Boolean commentDisabled = false;
+
 }

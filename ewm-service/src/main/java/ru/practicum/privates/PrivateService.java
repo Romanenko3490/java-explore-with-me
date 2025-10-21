@@ -385,7 +385,7 @@ public class PrivateService {
         );
 
         if (event.getCommentDisabled()) {
-            throw new ConflictException("Comments are disabled for event " +  eventId);
+            throw new ConflictException("Comments are disabled for event " + eventId);
         }
 
         Comment comment = Comment.builder()
@@ -590,11 +590,11 @@ public class PrivateService {
             throw new ConflictException("Comments are already enabled");
         }
 
-        switch(command) {
+        switch (command) {
             case DISABLE_COMMENTS -> event.setCommentDisabled(true);
             case ENABLE_COMMENTS -> event.setCommentDisabled(false);
         }
-        log.info("Comments setting updated. Setting {} for event {}", command, eventId );
+        log.info("Comments setting updated. Setting {} for event {}", command, eventId);
 
         return eventMapper.toSimpleDto(eventRepository.save(event));
     }

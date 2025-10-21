@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import ru.practicum.base.BaseWebClient;
 import ru.practicum.comments.*;
@@ -60,32 +59,32 @@ public class PrivateWebCommentsClient extends BaseWebClient {
     }
 
     public CommentDto updateCommentStatus(Long userId, Long eventId, Long commentId, CommentCommand command) {
-            return webClient.patch()
-                    .uri(uriBuilder -> uriBuilder
-                                    .path("/" + userId + "/events/" + eventId + "/comments/" + commentId + "/status")
-                                    .queryParam("command", command)
-                                    .build()
-                            )
-                    .accept(MediaType.APPLICATION_JSON)
-                    .bodyValue(command)
-                    .retrieve()
-                    .onStatus(status -> status == HttpStatus.NOT_FOUND, response ->
-                            response.bodyToMono(String.class)
-                                    .handle((errorBody, sink) -> {
-                                        sink.error(new NotFoundException(errorBody));
-                                    }))
-                    .onStatus(status -> status == HttpStatus.CONFLICT, response ->
-                            response.bodyToMono(String.class)
-                                    .handle((errorBody, sink) -> {
-                                        sink.error(new ConflictException(errorBody));
-                                    }))
-                    .onStatus(status -> status == HttpStatus.FORBIDDEN, response ->
-                            response.bodyToMono(String.class)
-                                    .handle((errorBody, sink) -> {
-                                        sink.error(new ForbiddenException(errorBody));
-                                    }))
-                    .bodyToMono(CommentDto.class)
-                    .block();
+        return webClient.patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/" + userId + "/events/" + eventId + "/comments/" + commentId + "/status")
+                        .queryParam("command", command)
+                        .build()
+                )
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(command)
+                .retrieve()
+                .onStatus(status -> status == HttpStatus.NOT_FOUND, response ->
+                        response.bodyToMono(String.class)
+                                .handle((errorBody, sink) -> {
+                                    sink.error(new NotFoundException(errorBody));
+                                }))
+                .onStatus(status -> status == HttpStatus.CONFLICT, response ->
+                        response.bodyToMono(String.class)
+                                .handle((errorBody, sink) -> {
+                                    sink.error(new ConflictException(errorBody));
+                                }))
+                .onStatus(status -> status == HttpStatus.FORBIDDEN, response ->
+                        response.bodyToMono(String.class)
+                                .handle((errorBody, sink) -> {
+                                    sink.error(new ForbiddenException(errorBody));
+                                }))
+                .bodyToMono(CommentDto.class)
+                .block();
     }
 
 
@@ -138,7 +137,7 @@ public class PrivateWebCommentsClient extends BaseWebClient {
     public Flux<CommentDto> getUserComments(Long userId, CommentsShowingParam param, Integer from, Integer size) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/" + userId +"/comments")
+                        .path("/" + userId + "/comments")
                         .queryParam("param", param)
                         .queryParam("from", from)
                         .queryParam("size", size)

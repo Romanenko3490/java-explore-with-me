@@ -5,13 +5,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
-import org.hibernate.query.Page;
-import org.hibernate.query.UnknownSqlResultSetMappingException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.service.annotation.HttpExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.practicum.comments.*;
@@ -19,10 +15,8 @@ import ru.practicum.events.*;
 import ru.practicum.requests.EventRequestStatusUpdateRequest;
 import ru.practicum.requests.EventRequestStatusUpdateResult;
 import ru.practicum.requests.RequestDto;
-import ru.practicum.user.UserDto;
 import ru.practicum.util.RequestsValidator;
 
-import java.security.spec.EdDSAParameterSpec;
 import java.util.List;
 
 @RestController
@@ -144,7 +138,7 @@ public class PrivateController {
             @PathVariable @Min(1) Long eventId,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "20") Integer size
-    ){
+    ) {
         return privateWebCommentsClient.getComments(userId, eventId, from, size);
     }
 
@@ -164,7 +158,7 @@ public class PrivateController {
             @PathVariable @Min(1) Long eventId,
             @PathVariable @Min(1) Long commentId,
             @RequestParam CommentCommand command
-            ) {
+    ) {
         return privateWebCommentsClient.updateCommentStatus(userId, eventId, commentId, command);
     }
 
@@ -175,7 +169,7 @@ public class PrivateController {
             @PathVariable @Min(1) Long eventId,
             @PathVariable @Min(1) Long commentId,
             @RequestBody @Valid NewCommentRequest request
-            ) {
+    ) {
         return privateWebCommentsClient.replyToComment(userId, eventId, commentId, request);
     }
 
@@ -194,10 +188,9 @@ public class PrivateController {
             @PathVariable @Min(1) Long userId,
             @PathVariable @Min(1) Long eventId,
             @RequestParam CommentsSetting command
-            ) {
+    ) {
         return privateWebEventsClient.updateCommentsSetting(userId, eventId, command);
     }
-
 
 
 }

@@ -118,7 +118,7 @@ public class PrivateInternalController {
             @PathVariable Long eventId,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "20") Integer size
-    ){
+    ) {
         return privateService.getComments(userId, eventId, from, size);
     }
 

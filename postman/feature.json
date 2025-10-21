@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "c28bef52-227f-43f4-b022-a765c4d53b4b",
 		"name": "feature",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "45515798",
 		"_collection_link": "https://german-6705617.postman.co/workspace/German's-Workspace~63c0fd15-9840-48e5-8f23-c9340cfdad4c/collection/45515798-c28bef52-227f-43f4-b022-a765c4d53b4b?action=share&source=collection_link&creator=45515798"
 	},
@@ -14,7 +14,11 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"// Устанавливаем base_url для всех запросов\r",
+							"const baseUrl = \"http://localhost:8080\";\r",
+							"pm.environment.set(\"base_url\", baseUrl);\r",
+							"\r",
+							"console.log(\"Base URL установлен:\", baseUrl);\r",
 							"\r",
 							"// Очищаем старые значения (на случай повторного запуска)\r",
 							"pm.environment.unset(\"user1_id\");\r",
@@ -26,8 +30,8 @@
 							"pm.environment.unset(\"category2_id\");\r",
 							"pm.environment.unset(\"event1_id\");\r",
 							"pm.environment.unset(\"event2_id\");\r",
-							"pm.environment.unset(\"owner_id\"); // ← добавлено\r",
-							"pm.environment.unset(\"event_id\"); // ← добавлено\r",
+							"pm.environment.unset(\"owner_id\"); \r",
+							"pm.environment.unset(\"event_id\");\r",
 							"\r",
 							"// Создаём 5 уникальных пользователей\r",
 							"const users = [\r",
@@ -120,7 +124,10 @@
 							"}\r",
 							"\r",
 							"function createEvents() {\r",
-							"    const userIds = createdUserIds;\r",
+							"    const userIds = [\r",
+							"        pm.environment.get(\"user1_id\"),\r",
+							"        pm.environment.get(\"user2_id\")\r",
+							"    ];\r",
 							"    const categoryIds = [\r",
 							"        Number(pm.environment.get(\"category1_id\")),\r",
 							"        Number(pm.environment.get(\"category2_id\"))\r",
@@ -263,7 +270,15 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": "{{base_url}}/setup"
+				"url": {
+					"raw": "{{base_url}}/setup",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"setup"
+					]
+				}
 			},
 			"response": []
 		},
@@ -778,7 +793,19 @@
 						}
 					}
 				},
-				"url": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments"
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id}}",
+						"events",
+						"{{event_id}}",
+						"comments"
+					]
+				}
 			},
 			"response": []
 		},
@@ -858,7 +885,19 @@
 						}
 					}
 				},
-				"url": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments"
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id}}",
+						"events",
+						"{{event_id}}",
+						"comments"
+					]
+				}
 			},
 			"response": []
 		},
@@ -938,7 +977,20 @@
 						}
 					}
 				},
-				"url": "{{base_url}}/users/{{owner_id}}/events/{{event_id}}/comments/{{comment_id}}"
+				"url": {
+					"raw": "{{base_url}}/users/{{owner_id}}/events/{{event_id}}/comments/{{comment_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{owner_id}}",
+						"events",
+						"{{event_id}}",
+						"comments",
+						"{{comment_id}}"
+					]
+				}
 			},
 			"response": []
 		},
@@ -1029,7 +1081,20 @@
 						}
 					}
 				},
-				"url": "{{base_url}}/users/{{requester1_id}}/events/{{event_id}}/comments/{{comment_id}}"
+				"url": {
+					"raw": "{{base_url}}/users/{{requester1_id}}/events/{{event_id}}/comments/{{comment_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{requester1_id}}",
+						"events",
+						"{{event_id}}",
+						"comments",
+						"{{comment_id}}"
+					]
+				}
 			},
 			"response": []
 		},
@@ -1117,7 +1182,20 @@
 						}
 					}
 				},
-				"url": "{{base_url}}/users/{{requester2_id}}/events/{{event_id}}/comments/{{reply_id}}"
+				"url": {
+					"raw": "{{base_url}}/users/{{requester2_id}}/events/{{event_id}}/comments/{{reply_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{requester2_id}}",
+						"events",
+						"{{event_id}}",
+						"comments",
+						"{{reply_id}}"
+					]
+				}
 			},
 			"response": []
 		},
@@ -1306,7 +1384,19 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments"
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id}}",
+						"events",
+						"{{event_id}}",
+						"comments"
+					]
+				}
 			},
 			"response": []
 		},
@@ -1696,7 +1786,19 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "{{base_url}}/users/{{user1_id}}/events/{{event2_id}}/comments"
+				"url": {
+					"raw": "{{base_url}}/users/{{user1_id}}/events/{{event2_id}}/comments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user1_id}}",
+						"events",
+						"{{event2_id}}",
+						"comments"
+					]
+				}
 			},
 			"response": []
 		},
@@ -1768,7 +1870,19 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments"
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id}}",
+						"events",
+						"{{event_id}}",
+						"comments"
+					]
+				}
 			},
 			"response": []
 		},
@@ -1840,7 +1954,19 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments"
+				"url": {
+					"raw": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user_id}}",
+						"events",
+						"{{event_id}}",
+						"comments"
+					]
+				}
 			},
 			"response": []
 		},
@@ -1925,7 +2051,20 @@
 						}
 					}
 				},
-				"url": "{{base_url}}/users/{{owner_id}}/events/{{event_id}}/comments/{{comment_id}}"
+				"url": {
+					"raw": "{{base_url}}/users/{{owner_id}}/events/{{event_id}}/comments/{{comment_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{owner_id}}",
+						"events",
+						"{{event_id}}",
+						"comments",
+						"{{comment_id}}"
+					]
+				}
 			},
 			"response": []
 		},
@@ -2141,7 +2280,17 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "{{base_url}}/users/{{owner_id}}/comments"
+				"url": {
+					"raw": "{{base_url}}/users/{{owner_id}}/comments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{owner_id}}",
+						"comments"
+					]
+				}
 			},
 			"response": []
 		},

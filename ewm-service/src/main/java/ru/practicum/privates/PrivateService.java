@@ -497,7 +497,7 @@ public class PrivateService {
 //        parentComment.getReplies().add(reply); здесь не нужно обновлять и сохранять родителя(cascade = CascadeType.ALL),
 //        commentRepository.save(parentComment); связь устанавливается через через parent_comment_id
 //        log.info("Parent comment saved: {} ", parentComment); коллекция replies - это просто "вид" из родителя
-        // При следующем чтении родителя, Hibernate автоматически заполнит replies
+//        При следующем чтении родителя, Hibernate автоматически заполнит replies
 
         return commentMapper.commentToCommentDto(reply);
     }

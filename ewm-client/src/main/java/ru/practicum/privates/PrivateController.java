@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.service.annotation.HttpExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.practicum.comments.*;
@@ -128,6 +129,7 @@ public class PrivateController {
     //comments
 
     @PostMapping("/events/{eventId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
     public CommentDto addComment(
             @PathVariable @Min(1) Long userId,
             @PathVariable @Min(1) Long eventId,
@@ -156,17 +158,18 @@ public class PrivateController {
         return privateWebCommentsClient.updateComment(userId, eventId, commentId, request);
     }
 
-    @PatchMapping("events/{eventId}/comments/{commentId}")
+    @PatchMapping("events/{eventId}/comments/{commentId}/status")
     public CommentDto updateCommentStatus(
             @PathVariable @Min(1) Long userId,
             @PathVariable @Min(1) Long eventId,
             @PathVariable @Min(1) Long commentId,
-            @RequestBody CommentCommand command
+            @RequestParam CommentCommand command
             ) {
         return privateWebCommentsClient.updateCommentStatus(userId, eventId, commentId, command);
     }
 
     @PostMapping("events/{eventId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.CREATED)
     public CommentDto replyToComment(
             @PathVariable @Min(1) Long userId,
             @PathVariable @Min(1) Long eventId,
@@ -190,7 +193,7 @@ public class PrivateController {
     public SimpleEventDto updateCommentsSetting(
             @PathVariable @Min(1) Long userId,
             @PathVariable @Min(1) Long eventId,
-            @RequestParam(defaultValue = "false") CommentsSetting command
+            @RequestParam CommentsSetting command
             ) {
         return privateWebEventsClient.updateCommentsSetting(userId, eventId, command);
     }

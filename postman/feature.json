@@ -1,0 +1,2592 @@
+{
+	"info": {
+		"_postman_id": "c28bef52-227f-43f4-b022-a765c4d53b4b",
+		"name": "feature",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "45515798",
+		"_collection_link": "https://german-6705617.postman.co/workspace/German's-Workspace~63c0fd15-9840-48e5-8f23-c9340cfdad4c/collection/45515798-c28bef52-227f-43f4-b022-a765c4d53b4b?action=share&source=collection_link&creator=45515798"
+	},
+	"item": [
+		{
+			"name": "setup",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"// Очищаем старые значения (на случай повторного запуска)\r",
+							"pm.environment.unset(\"user1_id\");\r",
+							"pm.environment.unset(\"user2_id\");\r",
+							"pm.environment.unset(\"user3_id\");\r",
+							"pm.environment.unset(\"user4_id\");\r",
+							"pm.environment.unset(\"user5_id\");\r",
+							"pm.environment.unset(\"category1_id\");\r",
+							"pm.environment.unset(\"category2_id\");\r",
+							"pm.environment.unset(\"event1_id\");\r",
+							"pm.environment.unset(\"event2_id\");\r",
+							"pm.environment.unset(\"owner_id\"); // ← добавлено\r",
+							"pm.environment.unset(\"event_id\"); // ← добавлено\r",
+							"\r",
+							"// Создаём 5 уникальных пользователей\r",
+							"const users = [\r",
+							"    { email: `user1_${Date.now()}@test.com`, name: \"User 1\" },\r",
+							"    { email: `user2_${Date.now()}@test.com`, name: \"User 2\" },\r",
+							"    { email: `user3_${Date.now()}@test.com`, name: \"User 3\" },\r",
+							"    { email: `user4_${Date.now()}@test.com`, name: \"User 4\" },\r",
+							"    { email: `user5_${Date.now()}@test.com`, name: \"User 5\" }\r",
+							"];\r",
+							"\r",
+							"const createdUserIds = [];\r",
+							"\r",
+							"function createUser(index) {\r",
+							"    if (index >= users.length) {\r",
+							"        // Сохраняем ID пользователей в environment\r",
+							"        pm.environment.set(\"user1_id\", createdUserIds[0]);\r",
+							"        pm.environment.set(\"user2_id\", createdUserIds[1]);\r",
+							"        pm.environment.set(\"user3_id\", createdUserIds[2]);\r",
+							"        pm.environment.set(\"user4_id\", createdUserIds[3]);\r",
+							"        pm.environment.set(\"user5_id\", createdUserIds[4]);\r",
+							"        console.log(\"User IDs:\", createdUserIds);\r",
+							"        \r",
+							"        // Сохраняем owner_id для теста\r",
+							"        pm.environment.set(\"owner_id\", createdUserIds[0]); // ← добавлено\r",
+							"        console.log(\"Owner ID для теста:\", createdUserIds[0]);\r",
+							"        \r",
+							"        // Создаём категории\r",
+							"        createCategories();\r",
+							"        return;\r",
+							"    }\r",
+							"\r",
+							"    const user = users[index];\r",
+							"    pm.sendRequest({\r",
+							"        url: `${baseUrl}/admin/users`,\r",
+							"        method: 'POST',\r",
+							"        header: { 'Content-Type': 'application/json' },\r",
+							"        body: JSON.stringify(user)\r",
+							"    }, function (err, res) {\r",
+							"        if (err) {\r",
+							"            console.error(\"Ошибка при создании пользователя:\", err);\r",
+							"        } else {\r",
+							"            const response = res.json();\r",
+							"            createdUserIds.push(response.id);\r",
+							"            console.log(`Пользователь ${index + 1} создан с ID:`, response.id);\r",
+							"        }\r",
+							"        createUser(index + 1);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"function createCategories() {\r",
+							"    const categories = [\r",
+							"        { name: `Category 1 ${Date.now()}` },\r",
+							"        { name: `Category 2 ${Date.now()}` }\r",
+							"    ];\r",
+							"\r",
+							"    const createdCategoryIds = [];\r",
+							"\r",
+							"    function createCategory(index) {\r",
+							"        if (index >= categories.length) {\r",
+							"            // Сохраняем ID категорий в environment\r",
+							"            pm.environment.set(\"category1_id\", createdCategoryIds[0]);\r",
+							"            pm.environment.set(\"category2_id\", createdCategoryIds[1]);\r",
+							"            console.log(\"Category IDs:\", createdCategoryIds);\r",
+							"            \r",
+							"            // Создаём события\r",
+							"            createEvents();\r",
+							"            return;\r",
+							"        }\r",
+							"\r",
+							"        const category = categories[index];\r",
+							"        pm.sendRequest({\r",
+							"            url: `${baseUrl}/admin/categories`,\r",
+							"            method: 'POST',\r",
+							"            header: { 'Content-Type': 'application/json' },\r",
+							"            body: JSON.stringify(category)\r",
+							"        }, function (err, res) {\r",
+							"            if (err) {\r",
+							"                console.error(\"Ошибка при создании категории:\", err);\r",
+							"            } else {\r",
+							"                const response = res.json();\r",
+							"                createdCategoryIds.push(response.id);\r",
+							"                console.log(`Категория ${index + 1} создана с ID:`, response.id);\r",
+							"                console.log(\"Название категории:\", response.name);\r",
+							"            }\r",
+							"            createCategory(index + 1);\r",
+							"        });\r",
+							"    }\r",
+							"\r",
+							"    createCategory(0);\r",
+							"}\r",
+							"\r",
+							"function createEvents() {\r",
+							"    const userIds = createdUserIds;\r",
+							"    const categoryIds = [\r",
+							"        Number(pm.environment.get(\"category1_id\")),\r",
+							"        Number(pm.environment.get(\"category2_id\"))\r",
+							"    ];\r",
+							"\r",
+							"    // Создаём 2 события с LocationDto\r",
+							"    const events = [\r",
+							"        {\r",
+							"            annotation: \"Event 1 for setup with location\",\r",
+							"            category: categoryIds[0], // ← первая категория\r",
+							"            description: \"Description for event 1 with location\",\r",
+							"            eventDate: \"2025-12-31 15:00:00\",\r",
+							"            location: { lat: 55.754167, lon: 37.62 }, // ← LocationDto\r",
+							"            paid: false,\r",
+							"            participantLimit: 10,\r",
+							"            requestModeration: true, // ← с модерацией\r",
+							"            title: \"Event 1 Title\"\r",
+							"        },\r",
+							"        {\r",
+							"            annotation: \"Event 2 for setup with location\",\r",
+							"            category: categoryIds[1], // ← вторая категория\r",
+							"            description: \"Description for event 2 with location\",\r",
+							"            eventDate: \"2025-12-30 14:00:00\",\r",
+							"            location: { lat: 55.754167, lon: 37.62 }, // ← LocationDto\r",
+							"            paid: true,\r",
+							"            participantLimit: 5,\r",
+							"            requestModeration: false, // ← без модерации\r",
+							"            title: \"Event 2 Title\"\r",
+							"        }\r",
+							"    ];\r",
+							"\r",
+							"    const createdEventIds = [];\r",
+							"\r",
+							"    function createEvent(index) {\r",
+							"        if (index >= events.length) {\r",
+							"            // Сохраняем ID событий в environment\r",
+							"            pm.environment.set(\"event1_id\", createdEventIds[0]);\r",
+							"            pm.environment.set(\"event2_id\", createdEventIds[1]);\r",
+							"            console.log(\"Event IDs:\", createdEventIds);\r",
+							"            \r",
+							"            // Сохраняем event_id для теста\r",
+							"            pm.environment.set(\"event_id\", createdEventIds[0]); // ← добавлено\r",
+							"            console.log(\"Event ID для теста:\", createdEventIds[0]);\r",
+							"            \r",
+							"            // Публикуем события\r",
+							"            publishEvents(createdEventIds);\r",
+							"            return;\r",
+							"        }\r",
+							"\r",
+							"        const userId = userIds[index]; // ← разные пользователи\r",
+							"        const event = events[index];\r",
+							"        pm.sendRequest({\r",
+							"            url: `${baseUrl}/users/${userId}/events`,\r",
+							"            method: 'POST',\r",
+							"            header: { 'Content-Type': 'application/json' },\r",
+							"            body: JSON.stringify(event)\r",
+							"        }, function (err, res) {\r",
+							"            if (err) {\r",
+							"                console.error(\"Ошибка при создании события:\", err);\r",
+							"            } else {\r",
+							"                const response = res.json();\r",
+							"                createdEventIds.push(response.id);\r",
+							"                console.log(`Событие ${index + 1} создано с ID:`, response.id);\r",
+							"                console.log(\"Participant limit:\", response.participantLimit);\r",
+							"                console.log(\"Request moderation:\", response.requestModeration);\r",
+							"            }\r",
+							"            createEvent(index + 1);\r",
+							"        });\r",
+							"    }\r",
+							"\r",
+							"    createEvent(0);\r",
+							"}\r",
+							"\r",
+							"function publishEvents(eventIds) {\r",
+							"    function publishEvent(index) {\r",
+							"        if (index >= eventIds.length) {\r",
+							"            console.log(\"Все события опубликованы\");\r",
+							"            console.log(\"✅ Setup завершён!\");\r",
+							"            return;\r",
+							"        }\r",
+							"\r",
+							"        const eventId = eventIds[index];\r",
+							"        pm.sendRequest({\r",
+							"            url: `${baseUrl}/admin/events/${eventId}`,\r",
+							"            method: 'PATCH',\r",
+							"            header: { 'Content-Type': 'application/json' },\r",
+							"            body: JSON.stringify({\r",
+							"                stateAction: \"PUBLISH_EVENT\"\r",
+							"            })\r",
+							"        }, function (err, res) {\r",
+							"            if (err) {\r",
+							"                console.error(\"Ошибка при публикации события:\", err);\r",
+							"            } else {\r",
+							"                const response = res.json();\r",
+							"                console.log(`Событие ${eventId} опубликовано, новое состояние:`, response.state);\r",
+							"            }\r",
+							"            publishEvent(index + 1);\r",
+							"        });\r",
+							"    }\r",
+							"\r",
+							"    publishEvent(0);\r",
+							"}\r",
+							"\r",
+							"// Запускаем создание пользователей\r",
+							"createUser(0);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Environment is prepared\", function () {\r",
+							"    pm.expect(pm.environment.get(\"user1_id\")).to.not.be.undefined;\r",
+							"    pm.expect(pm.environment.get(\"user2_id\")).to.not.be.undefined;\r",
+							"    pm.expect(pm.environment.get(\"user3_id\")).to.not.be.undefined;\r",
+							"    pm.expect(pm.environment.get(\"user4_id\")).to.not.be.undefined;\r",
+							"    pm.expect(pm.environment.get(\"user5_id\")).to.not.be.undefined;\r",
+							"    pm.expect(pm.environment.get(\"category1_id\")).to.not.be.undefined;\r",
+							"    pm.expect(pm.environment.get(\"category2_id\")).to.not.be.undefined;\r",
+							"    pm.expect(pm.environment.get(\"event1_id\")).to.not.be.undefined;\r",
+							"    pm.expect(pm.environment.get(\"event2_id\")).to.not.be.undefined;\r",
+							"});\r",
+							"\r",
+							"console.log(\"✅ Окружение готово к тестированию!\");"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{base_url}}/setup"
+			},
+			"response": []
+		},
+		{
+			"name": "Successfully swicth off comments for event 2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const ownerId = pm.environment.get(\"owner_id\");\r",
+							"const eventId = pm.environment.get(\"event_id\");\r",
+							"\r",
+							"pm.variables.set(\"owner_id\", ownerId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"console.log(\"Owner ID:\", ownerId);\r",
+							"console.log(\"Event ID:\", eventId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('id', 'title', 'commentDisabled');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Event ID matches\", function () {\r",
+							"    const eventId = Number(pm.environment.get(\"event_id\"));\r",
+							"    pm.expect(response.id).to.eql(eventId);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Title is correct\", function () {\r",
+							"    pm.expect(response.title).to.be.a('string');\r",
+							"    pm.expect(response.title).to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comment disabled is true\", function () {\r",
+							"    pm.expect(response.commentDisabled).to.be.true;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{owner_id}}/events/{{event_id}}/comments?command=DISABLE_COMMENTS",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{owner_id}}",
+						"events",
+						"{{event_id}}",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "command",
+							"value": "DISABLE_COMMENTS"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "No Registered user try change comments setting",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const eventId = pm.environment.get(\"event_id\");\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"console.log(\"Event ID:\", eventId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is NOT_FOUND\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"NOT_FOUND\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is The required object was not found.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"The required object was not found.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates user not found\", function () {\r",
+							"    const expectedMessage = \"User with id=999 was not found\";\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/999/events/{{event_id}}/comments?command=ENABLE_COMMENTS",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"999",
+						"events",
+						"{{event_id}}",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "command",
+							"value": "ENABLE_COMMENTS"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User try change comments setting for wrong event id",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const ownerId = pm.environment.get(\"owner_id\");\r",
+							"pm.variables.set(\"owner_id\", ownerId);\r",
+							"console.log(\"Owner ID:\", ownerId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is NOT_FOUND\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"NOT_FOUND\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is The required object was not found.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"The required object was not found.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates event not found\", function () {\r",
+							"    const expectedMessage = \"Event with id=999 was not found\";\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{owner_id}}/events/999/comments?command=DISABLE_COMMENTS",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{owner_id}}",
+						"events",
+						"999",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "command",
+							"value": "DISABLE_COMMENTS"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Coments already disabled",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const ownerId = pm.environment.get(\"owner_id\");\r",
+							"const eventId = pm.environment.get(\"event_id\");\r",
+							"\r",
+							"pm.variables.set(\"owner_id\", ownerId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"console.log(\"Owner ID:\", ownerId);\r",
+							"console.log(\"Event ID:\", eventId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409 Conflict\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is CONFLICT\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"CONFLICT\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is For the requested operation the conditions are not met.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"For the requested operation the conditions are not met.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates comments already disabled\", function () {\r",
+							"    const expectedMessage = \"Comments are already disabled\";\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{owner_id}}/events/{{event_id}}/comments?command=DISABLE_COMMENTS",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{owner_id}}",
+						"events",
+						"{{event_id}}",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "command",
+							"value": "DISABLE_COMMENTS"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Not owner try to change comments settings",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const eventId = pm.environment.get(\"event_id\");\r",
+							"const requesterId = pm.environment.get(\"user2_id\");\r",
+							"\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"requester_id\", requesterId);\r",
+							"console.log(\"Event ID:\", eventId);\r",
+							"console.log(\"Requester ID:\", requesterId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 403 Forbidden\", function () {\r",
+							"    pm.response.to.have.status(403);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is FORBIDDEN\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"FORBIDDEN\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is For the requested operation the conditions are not met.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"For the requested operation the conditions are not met.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates user not allowed to update comment settings\", function () {\r",
+							"    const requesterId = pm.environment.get(\"user2_id\"); // ← внутри теста\r",
+							"    const expectedMessage = `User with id=${requesterId} not allowed to update comment settings`;\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{requester_id}}/events/{{event_id}}/comments?command=ENABLE_COMMENTS",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{requester_id}}",
+						"events",
+						"{{event_id}}",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "command",
+							"value": "ENABLE_COMMENTS"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add valid comment",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const userId = pm.environment.get(\"user1_id\");\r",
+							"const eventId = pm.environment.get(\"event2_id\");\r",
+							"\r",
+							"pm.variables.set(\"user_id\", userId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"console.log(\"User ID:\", userId);\r",
+							"console.log(\"Event ID:\", eventId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201 Created\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('id', 'text', 'parentComment', 'author', 'creationDate');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comment ID is a number\", function () {\r",
+							"    pm.expect(response.id).to.be.a('number');\r",
+							"    pm.expect(response.id).to.be.greaterThan(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Text matches\", function () {\r",
+							"    pm.expect(response.text).to.eql(\"This is a test comment\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Parent comment is null (top-level comment)\", function () {\r",
+							"    pm.expect(response.parentComment).to.be.null;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Author is a string\", function () {\r",
+							"    pm.expect(response.author).to.be.a('string');\r",
+							"    pm.expect(response.author).to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Creation date is valid\", function () {\r",
+							"    const creationDate = new Date(response.creationDate);\r",
+							"    pm.expect(isNaN(creationDate.getTime())).to.be.false;\r",
+							"    pm.expect(response.creationDate).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});\r",
+							"\r",
+							"// Сохраняем ID комментария для следующих тестов\r",
+							"pm.environment.set(\"comment_id\", response.id);\r",
+							"console.log(\"Comment ID:\", response.id);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"text\": \"This is a test comment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments"
+			},
+			"response": []
+		},
+		{
+			"name": "Reply to coment by empty text field",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const userId = pm.environment.get(\"user2_id\"); // ← второй пользователь\r",
+							"const eventId = pm.environment.get(\"event1_id\"); // ← событие с включёнными комментариями\r",
+							"\r",
+							"pm.variables.set(\"user_id\", userId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"console.log(\"User ID:\", userId);\r",
+							"console.log(\"Event ID:\", eventId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 Bad Request\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is BAD_REQUEST\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"BAD_REQUEST\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is Incorrectly made request.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"Incorrectly made request.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates field error\", function () {\r",
+							"    const expectedMessage = \"Field: text. Error: must not be blank. Value: \";\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"text\": \"\"  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments"
+			},
+			"response": []
+		},
+		{
+			"name": "Owner updates comment with empty text",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const userId = pm.environment.get(\"user1_id\");\r",
+							"const eventId = pm.environment.get(\"event2_id\");\r",
+							"\r",
+							"pm.variables.set(\"user_id\", userId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"console.log(\"User ID:\", userId);\r",
+							"console.log(\"Event ID:\", eventId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 Bad Request\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is BAD_REQUEST\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"BAD_REQUEST\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is Incorrectly made request.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"Incorrectly made request.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates field error\", function () {\r",
+							"    const expectedMessage = \"Field: text. Error: must not be blank. Value: \";\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"text\": \"\" \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{base_url}}/users/{{owner_id}}/events/{{event_id}}/comments/{{comment_id}}"
+			},
+			"response": []
+		},
+		{
+			"name": "Another user replies to comment",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const ownerId = pm.environment.get(\"user1_id\");\r",
+							"const requester1Id = pm.environment.get(\"user2_id\");\r",
+							"const eventId = pm.environment.get(\"event2_id\");\r",
+							"const commentId = pm.environment.get(\"comment_id\");\r",
+							"\r",
+							"pm.variables.set(\"owner_id\", ownerId);\r",
+							"pm.variables.set(\"requester1_id\", requester1Id);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"comment_id\", commentId);\r",
+							"console.log(\"Owner ID:\", ownerId);\r",
+							"console.log(\"Requester 1 ID:\", requester1Id);\r",
+							"console.log(\"Event ID:\", eventId);\r",
+							"console.log(\"Comment ID:\", commentId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201 Created\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('id', 'text', 'parentComment', 'author', 'creationDate');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comment ID is a number\", function () {\r",
+							"    pm.expect(response.id).to.be.a('number');\r",
+							"    pm.expect(response.id).to.be.greaterThan(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Text matches\", function () {\r",
+							"    pm.expect(response.text).to.eql(\"Reply to initial comment\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Parent comment ID matches\", function () {\r",
+							"    const commentId = Number(pm.variables.get(\"comment_id\"));\r",
+							"    pm.expect(response.parentComment).to.eql(commentId);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Creation date is valid\", function () {\r",
+							"    const creationDate = new Date(response.creationDate);\r",
+							"    pm.expect(isNaN(creationDate.getTime())).to.be.false;\r",
+							"    pm.expect(response.creationDate).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});\r",
+							"\r",
+							"// Сохраняем ID ответа для следующих тестов\r",
+							"pm.environment.set(\"reply_id\", response.id);\r",
+							"console.log(\"Reply ID:\", response.id);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"text\": \"Reply to initial comment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{base_url}}/users/{{requester1_id}}/events/{{event_id}}/comments/{{comment_id}}"
+			},
+			"response": []
+		},
+		{
+			"name": "Another user tries to update comment",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const ownerId = pm.environment.get(\"owner_id\");\r",
+							"const requester2Id = pm.environment.get(\"user2_id\");\r",
+							"const eventId = pm.environment.get(\"event2_id\");\r",
+							"const replyId = pm.environment.get(\"comment_id\");\r",
+							"\r",
+							"pm.variables.set(\"owner_id\", ownerId);\r",
+							"pm.variables.set(\"requester2_id\", requester2Id);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"reply_id\", replyId);\r",
+							"console.log(\"Owner ID:\", ownerId);\r",
+							"console.log(\"Requester 2 ID:\", requester2Id);\r",
+							"console.log(\"Event ID:\", eventId);\r",
+							"console.log(\"Reply ID:\", replyId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 403 Forbidden\", function () {\r",
+							"    pm.response.to.have.status(403);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is FORBIDDEN\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"FORBIDDEN\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is For the requested operation the conditions are not met.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"For the requested operation the conditions are not met.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates user cannot perform request\", function () {\r",
+							"    const requester2Id = pm.variables.get(\"requester2_id\");\r",
+							"    const replyId = pm.variables.get(\"reply_id\");\r",
+							"    const expectedMessage = `User ${requester2Id} cannot perform request `;\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"text\": \"Trying to update someone else's comment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{base_url}}/users/{{requester2_id}}/events/{{event_id}}/comments/{{reply_id}}"
+			},
+			"response": []
+		},
+		{
+			"name": "Owner deletes own comment",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const ownerId = pm.environment.get(\"owner_id\");\r",
+							"const eventId = pm.environment.get(\"event2_id\");\r",
+							"const commentId = pm.environment.get(\"comment_id\");\r",
+							"const user2_id = pm.environment.get(\"user2_id\");\r",
+							"\r",
+							"pm.variables.set(\"owner_id\", ownerId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"comment_id\", commentId);\r",
+							"console.log(\"Owner ID:\", ownerId);\r",
+							"console.log(\"Event ID:\", eventId);\r",
+							"console.log(\"Comment ID:\", commentId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('id', 'text', 'parentComment', 'author', 'creationDate');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comment ID matches\", function () {\r",
+							"    const commentId = Number(pm.variables.get(\"comment_id\"));\r",
+							"    pm.expect(response.id).to.eql(commentId);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Text matches\", function () {\r",
+							"    pm.expect(response.text).to.eql(\"This is a test comment\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Parent comment is null (top-level comment)\", function () {\r",
+							"    pm.expect(response.parentComment).to.be.null;\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Creation date is valid\", function () {\r",
+							"    const creationDate = new Date(response.creationDate);\r",
+							"    pm.expect(isNaN(creationDate.getTime())).to.be.false;\r",
+							"    pm.expect(response.creationDate).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/users/{{owner_id}}/events/{{event_id}}/comments/{{comment_id}}/status?command=DELETE",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{owner_id}}",
+						"events",
+						"{{event_id}}",
+						"comments",
+						"{{comment_id}}",
+						"status"
+					],
+					"query": [
+						{
+							"key": "command",
+							"value": "DELETE"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get comments for event 2 after owner delet his comment(reply from user 2 should be deleted also)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const userId = pm.environment.get(\"user1_id\");\r",
+							"const eventId = pm.environment.get(\"event2_id\"); \r",
+							"\r",
+							"pm.variables.set(\"user_id\", userId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"console.log(\"User ID:\", userId);\r",
+							"console.log(\"Event ID (without comments):\", eventId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response is an array\", function () {\r",
+							"    pm.expect(Array.isArray(response)).to.be.true;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is empty (no comments)\", function () {\r",
+							"    pm.expect(response.length).to.eql(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response equals []\", function () {\r",
+							"    pm.expect(response).to.eql([]);\r",
+							"});\r",
+							"\r",
+							"// Проверяем, что массив не содержит null или undefined\r",
+							"pm.test(\"Response does not contain null or undefined\", function () {\r",
+							"    pm.expect(response).to.not.include(null);\r",
+							"    pm.expect(response).to.not.include(undefined);\r",
+							"});\r",
+							"\r",
+							"// Проверяем, что тело ответа — пустой массив\r",
+							"pm.test(\"Response body is exactly []\", function () {\r",
+							"    const responseBody = pm.response.text();\r",
+							"    pm.expect(responseBody).to.eql(\"[]\");\r",
+							"});\r",
+							"\r",
+							"// Проверяем заголовки\r",
+							"pm.test(\"Content-Type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"// Проверяем, что время ответа < 1000 мс\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments"
+			},
+			"response": []
+		},
+		{
+			"name": "Another user tries to restore comment",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const requester1Id = pm.environment.get(\"user2_id\");\r",
+							"const eventId = pm.environment.get(\"event_id\");\r",
+							"const commentId = pm.environment.get(\"comment_id\");\r",
+							"\r",
+							"pm.variables.set(\"user2_id\", requester1Id);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"comment_id\", commentId);\r",
+							"console.log(\"Requester 1 ID:\", requester1Id);\r",
+							"console.log(\"Event ID:\", eventId);\r",
+							"console.log(\"Comment ID:\", commentId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 403 Forbidden\", function () {\r",
+							"    pm.response.to.have.status(403);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is FORBIDDEN\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"FORBIDDEN\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is For the requested operation the conditions are not met.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"For the requested operation the conditions are not met.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates user cannot perform request\", function () {\r",
+							"    const requester1Id = pm.variables.get(\"user2_id\");\r",
+							"    const commentId = pm.variables.get(\"comment_id\");\r",
+							"    const expectedMessage = `User ${requester1Id} cannot perform request. Not Author of comment with id=${commentId}`;\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user2_id}}/events/{{event_id}}/comments/{{comment_id}}/status?command=RESTORE",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user2_id}}",
+						"events",
+						"{{event_id}}",
+						"comments",
+						"{{comment_id}}",
+						"status"
+					],
+					"query": [
+						{
+							"key": "command",
+							"value": "RESTORE"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User tries to restore reply to deleted comment returns",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const requesterId = pm.environment.get(\"user2_id\");\r",
+							"const eventId = pm.environment.get(\"event2_id\");\r",
+							"const replyId = pm.environment.get(\"reply_id\");\r",
+							"\r",
+							"pm.variables.set(\"requester_id\", requesterId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"reply_id\", replyId);\r",
+							"console.log(\"Requester ID:\", requesterId);\r",
+							"console.log(\"Event ID:\", eventId);\r",
+							"console.log(\"Reply ID:\", replyId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409 Conflict\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is CONFLICT\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"CONFLICT\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"For the requested operation the conditions are not met.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"For the requested operation the conditions are not met.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates reply cannot be restored\", function () {\r",
+							"    const replyId = pm.variables.get(\"reply_id\");\r",
+							"    const expectedMessage = `Comment with id=${replyId} can not be restored. Reason:This comment is reply to deleted comment`;\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user2_id}}/events/{{event_id}}/comments/{{reply_id}}/status?command=RESTORE",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user2_id}}",
+						"events",
+						"{{event_id}}",
+						"comments",
+						"{{reply_id}}",
+						"status"
+					],
+					"query": [
+						{
+							"key": "command",
+							"value": "RESTORE"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Owner restores own comment",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const ownerId = pm.environment.get(\"owner_id\");\r",
+							"const eventId = pm.environment.get(\"event2_id\");\r",
+							"const commentId = pm.environment.get(\"comment_id\");\r",
+							"\r",
+							"pm.variables.set(\"owner_id\", ownerId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"comment_id\", commentId);\r",
+							"console.log(\"Owner ID:\", ownerId);\r",
+							"console.log(\"Event ID:\", eventId);\r",
+							"console.log(\"Comment ID:\", commentId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('id', 'text', 'parentComment', 'author', 'creationDate');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comment ID matches\", function () {\r",
+							"    const requestId = Number(pm.variables.get(\"comment_id\"));\r",
+							"    pm.expect(response.id).to.eql(requestId);\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{owner_id}}/events/{{event_id}}/comments/{{comment_id}}/status?command=RESTORE",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{owner_id}}",
+						"events",
+						"{{event_id}}",
+						"comments",
+						"{{comment_id}}",
+						"status"
+					],
+					"query": [
+						{
+							"key": "command",
+							"value": "RESTORE"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get comments for event 2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const userId = pm.environment.get(\"user1_id\");\r",
+							"const eventId = pm.environment.get(\"event2_id\");\r",
+							"\r",
+							"pm.variables.set(\"user_id\", userId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"console.log(\"User ID:\", userId);\r",
+							"console.log(\"Event ID:\", eventId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response is an array\", function () {\r",
+							"    pm.expect(Array.isArray(response)).to.be.true;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response has at least 1 comment\", function () {\r",
+							"    pm.expect(response.length).to.be.greaterThan(0);\r",
+							"});\r",
+							"\r",
+							"// Проверяем структуру каждого комментария\r",
+							"response.forEach(comment => {\r",
+							"    pm.test(`Comment ${comment.id} has correct structure`, function () {\r",
+							"        pm.expect(comment).to.include.all.keys('id', 'text', 'parentComment', 'author', 'creationDate');\r",
+							"    });\r",
+							"\r",
+							"    pm.test(`Comment ${comment.id} has valid ID`, function () {\r",
+							"        pm.expect(comment.id).to.be.a('number');\r",
+							"        pm.expect(comment.id).to.be.greaterThan(0);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(`Comment ${comment.id} has valid text`, function () {\r",
+							"        pm.expect(comment.text).to.be.a('string');\r",
+							"        pm.expect(comment.text).to.not.be.empty;\r",
+							"    });\r",
+							"\r",
+							"    pm.test(`Comment ${comment.id} has valid author`, function () {\r",
+							"        pm.expect(comment.author).to.be.a('string');\r",
+							"        pm.expect(comment.author).to.not.be.empty;\r",
+							"    });\r",
+							"\r",
+							"    pm.test(`Comment ${comment.id} has valid creationDate`, function () {\r",
+							"        const creationDate = new Date(comment.creationDate);\r",
+							"        pm.expect(isNaN(creationDate.getTime())).to.be.false;\r",
+							"        pm.expect(comment.creationDate).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(`Comment ${comment.id} has valid parentComment (null or number)`, function () {\r",
+							"        if (comment.parentComment !== null) {\r",
+							"            pm.expect(comment.parentComment).to.be.a('number');\r",
+							"            pm.expect(comment.parentComment).to.be.greaterThan(0);\r",
+							"        }\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// Проверяем, что есть комментарий от User 1 (владельца)\r",
+							"pm.test(\"Contains comment from User 1 (owner)\", function () {\r",
+							"    const ownerComment = response.find(comment => comment.author === \"User 1\");\r",
+							"    pm.expect(ownerComment).to.not.be.undefined;\r",
+							"    pm.expect(ownerComment.text).to.eql(\"This is a test comment\");\r",
+							"    pm.expect(ownerComment.parentComment).to.be.null;\r",
+							"});\r",
+							"\r",
+							"// Проверяем, что есть комментарий от User 2 (ответ)\r",
+							"pm.test(\"Contains reply from User 2\", function () {\r",
+							"    const replyComment = response.find(comment => comment.author === \"User 2\");\r",
+							"    pm.expect(replyComment).to.not.be.undefined;\r",
+							"    pm.expect(replyComment.text).to.eql(\"Reply to initial comment\");\r",
+							"    pm.expect(replyComment.parentComment).to.not.be.null;\r",
+							"});\r",
+							"\r",
+							"// Проверяем, что комментарии отсортированы по дате (новые первые)\r",
+							"pm.test(\"Comments are sorted by creationDate descending\", function () {\r",
+							"    for (let i = 0; i < response.length - 1; i++) {\r",
+							"        const current = new Date(response[i].creationDate);\r",
+							"        const next = new Date(response[i + 1].creationDate);\r",
+							"        pm.expect(current >= next).to.be.true;\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": "{{base_url}}/users/{{user1_id}}/events/{{event2_id}}/comments"
+			},
+			"response": []
+		},
+		{
+			"name": "Non-existent user geting comments for event",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const nonExistentUserId = 999;\r",
+							"const eventId = pm.environment.get(\"event1_id\");\r",
+							"\r",
+							"pm.variables.set(\"user_id\", nonExistentUserId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"console.log(\"User ID (non-existent):\", nonExistentUserId);\r",
+							"console.log(\"Event ID:\", eventId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is NOT_FOUND\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"NOT_FOUND\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is The required object was not found.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"The required object was not found.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates user not found\", function () {\r",
+							"    const userId = pm.variables.get(\"user_id\");\r",
+							"    const expectedMessage = `User with id=${userId} was not found`;\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments"
+			},
+			"response": []
+		},
+		{
+			"name": "User geting non-existent event",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const userId = pm.environment.get(\"user1_id\"); // ← существующий пользователь\r",
+							"const nonExistentEventId = 999; // ← несуществующее событие\r",
+							"\r",
+							"pm.variables.set(\"user_id\", userId);\r",
+							"pm.variables.set(\"event_id\", nonExistentEventId);\r",
+							"console.log(\"User ID:\", userId);\r",
+							"console.log(\"Event ID (non-existent):\", nonExistentEventId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('status', 'reason', 'message', 'timestamp');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status is NOT_FOUND\", function () {\r",
+							"    pm.expect(response.status).to.eql(\"NOT_FOUND\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Reason is The required object was not found.\", function () {\r",
+							"    pm.expect(response.reason).to.eql(\"The required object was not found.\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message indicates event not found\", function () {\r",
+							"    const eventId = pm.variables.get(\"event_id\");\r",
+							"    const expectedMessage = `Event with id=${eventId} was not found`;\r",
+							"    pm.expect(response.message).to.eql(expectedMessage);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamp is valid\", function () {\r",
+							"    const timestamp = new Date(response.timestamp);\r",
+							"    pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"    pm.expect(response.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": "{{base_url}}/users/{{user_id}}/events/{{event_id}}/comments"
+			},
+			"response": []
+		},
+		{
+			"name": "Owner updates own comment",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const ownerId = pm.environment.get(\"owner_id\");\r",
+							"const eventId = pm.environment.get(\"event2_id\");\r",
+							"const commentId = pm.environment.get(\"comment_id\");\r",
+							"\r",
+							"pm.variables.set(\"owner_id\", ownerId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"comment_id\", commentId);\r",
+							"console.log(\"Owner ID:\", ownerId);\r",
+							"console.log(\"Event ID:\", eventId);\r",
+							"console.log(\"Comment ID:\", commentId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response has correct structure\", function () {\r",
+							"    pm.expect(response).to.include.all.keys('id', 'text', 'parentComment', 'author', 'creationDate');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comment ID matches\", function () {\r",
+							"    const commentId = Number(pm.variables.get(\"comment_id\"));\r",
+							"    pm.expect(response.id).to.eql(commentId);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Text is updated\", function () {\r",
+							"    pm.expect(response.text).to.eql(\"Updated comment text\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Parent comment is null (top-level comment)\", function () {\r",
+							"    pm.expect(response.parentComment).to.be.null;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Creation date is valid\", function () {\r",
+							"    const creationDate = new Date(response.creationDate);\r",
+							"    pm.expect(isNaN(creationDate.getTime())).to.be.false;\r",
+							"    pm.expect(response.creationDate).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"text\": \"Updated comment text\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{base_url}}/users/{{owner_id}}/events/{{event_id}}/comments/{{comment_id}}"
+			},
+			"response": []
+		},
+		{
+			"name": "User request all own comments with without parametr",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"// Получаем ID пользователей из environment (setup)\r",
+							"const ownerId = pm.environment.get(\"owner_id\");\r",
+							"const requester2Id = pm.environment.get(\"user2_id\");\r",
+							"const category1Id = pm.environment.get(\"category1_id\");\r",
+							"\r",
+							"pm.variables.set(\"owner_id\", ownerId);\r",
+							"pm.variables.set(\"requester2_id\", requester2Id);\r",
+							"pm.variables.set(\"category1_id\", category1Id);\r",
+							"console.log(\"Owner ID:\", ownerId);\r",
+							"console.log(\"Requester 2 ID:\", requester2Id);\r",
+							"console.log(\"Category 1 ID:\", category1Id);\r",
+							"\r",
+							"// Создаём событие от requester2\r",
+							"createEvent();\r",
+							"\r",
+							"function createEvent() {\r",
+							"    const event = {\r",
+							"        annotation: \"Event for user comments test\",\r",
+							"        category: Number(category1Id),\r",
+							"        description: \"This event is used to test user comments\",\r",
+							"        eventDate: \"2025-12-31 15:00:00\",\r",
+							"        location: { lat: 55.754167, lon: 37.62 },\r",
+							"        paid: false,\r",
+							"        participantLimit: 10,\r",
+							"        requestModeration: true,\r",
+							"        title: \"Event for User Comments Test\"\r",
+							"    };\r",
+							"\r",
+							"    pm.sendRequest({\r",
+							"        url: `${baseUrl}/users/${requester2Id}/events`,\r",
+							"        method: 'POST',\r",
+							"        header: { 'Content-Type': 'application/json' },\r",
+							"        body: JSON.stringify(event)\r",
+							"    }, function (err, res) {\r",
+							"        if (err) {\r",
+							"            console.error(\"Ошибка при создании события:\", err);\r",
+							"        } else {\r",
+							"            const response = res.json();\r",
+							"            const eventId = response.id;\r",
+							"            \r",
+							"            // Сохраняем ID события\r",
+							"            pm.variables.set(\"event3_id\", eventId);\r",
+							"            pm.environment.set(\"event3_id\", eventId);\r",
+							"            \r",
+							"            console.log(\"Создано событие с ID:\", eventId);\r",
+							"            console.log(\"event3_id сохранен в окружение:\", eventId);\r",
+							"            \r",
+							"            // Проверяем сохранение\r",
+							"            const checkEnv = pm.environment.get(\"event3_id\");\r",
+							"            console.log(\"Проверка окружения - event3_id:\", checkEnv);\r",
+							"            \r",
+							"            // Публикуем событие\r",
+							"            publishEvent(eventId);\r",
+							"        }\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"function publishEvent(eventId) {\r",
+							"    pm.sendRequest({\r",
+							"        url: `${baseUrl}/admin/events/${eventId}`,\r",
+							"        method: 'PATCH',\r",
+							"        header: { 'Content-Type': 'application/json' },\r",
+							"        body: JSON.stringify({\r",
+							"            stateAction: \"PUBLISH_EVENT\"\r",
+							"        })\r",
+							"    }, function (err, res) {\r",
+							"        if (err) {\r",
+							"            console.error(\"Ошибка при публикации события:\", err);\r",
+							"        } else {\r",
+							"            console.log(\"Событие опубликовано\");\r",
+							"            \r",
+							"            // Оставляем 5 комментариев от owner к новому событию\r",
+							"            createComments(eventId);\r",
+							"        }\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"function createComments(eventId) {\r",
+							"    const owner = pm.variables.get(\"owner_id\");\r",
+							"    const comments = [\r",
+							"        { text: \"Comment 1 for event 3\" },\r",
+							"        { text: \"Comment 2 for event 3\" },\r",
+							"        { text: \"Comment 3 for event 3\" },\r",
+							"        { text: \"Comment 4 for event 3\" },\r",
+							"        { text: \"Comment 5 for event 3\" }\r",
+							"    ];\r",
+							"\r",
+							"    const createdCommentIds = [];\r",
+							"\r",
+							"    function createComment(index) {\r",
+							"        if (index >= comments.length) {\r",
+							"            console.log(\"Все 5 комментариев созданы, ID:\", createdCommentIds);\r",
+							"            \r",
+							"            // Сохраняем ID комментариев в environment\r",
+							"            pm.environment.set(\"comment3_id\", createdCommentIds[0]);\r",
+							"            pm.environment.set(\"comment4_id\", createdCommentIds[1]);\r",
+							"            pm.environment.set(\"comment5_id\", createdCommentIds[2]);\r",
+							"            pm.environment.set(\"comment6_id\", createdCommentIds[3]);\r",
+							"            pm.environment.set(\"comment7_id\", createdCommentIds[4]);\r",
+							"            \r",
+							"            console.log(\"Comment IDs сохранены в окружение:\", createdCommentIds);\r",
+							"            \r",
+							"            // Финальная проверка всех сохраненных переменных\r",
+							"            setTimeout(() => {\r",
+							"                console.log(\"=== ФИНАЛЬНАЯ ПРОВЕРКА ПЕРЕМЕННЫХ ===\");\r",
+							"                console.log(\"event3_id:\", pm.environment.get(\"event3_id\"));\r",
+							"                console.log(\"comment3_id:\", pm.environment.get(\"comment3_id\"));\r",
+							"                console.log(\"comment4_id:\", pm.environment.get(\"comment4_id\"));\r",
+							"                console.log(\"comment5_id:\", pm.environment.get(\"comment5_id\"));\r",
+							"                console.log(\"comment6_id:\", pm.environment.get(\"comment6_id\"));\r",
+							"                console.log(\"comment7_id:\", pm.environment.get(\"comment7_id\"));\r",
+							"                console.log(\"=== ВСЕ КОММЕНТАРИИ СОЗДАНЫ И СОХРАНЕНЫ ===\");\r",
+							"            }, 500);\r",
+							"            return;\r",
+							"        }\r",
+							"\r",
+							"        const comment = comments[index];\r",
+							"        pm.sendRequest({\r",
+							"            url: `${baseUrl}/users/${owner}/events/${eventId}/comments`,\r",
+							"            method: 'POST',\r",
+							"            header: { 'Content-Type': 'application/json' },\r",
+							"            body: JSON.stringify(comment)\r",
+							"        }, function (err, res) {\r",
+							"            if (err) {\r",
+							"                console.error(\"Ошибка при создании комментария:\", err);\r",
+							"            } else {\r",
+							"                const response = res.json();\r",
+							"                createdCommentIds.push(response.id);\r",
+							"                console.log(`Комментарий ${index + 1} создан с ID:`, response.id);\r",
+							"            }\r",
+							"            createComment(index + 1);\r",
+							"        });\r",
+							"    }\r",
+							"\r",
+							"    createComment(0);\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response is an array\", function () {\r",
+							"    pm.expect(Array.isArray(response)).to.be.true;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response has exactly 6 comments\", function () {\r",
+							"    pm.expect(response.length).to.eql(6);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Each comment has correct structure\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment).to.include.all.keys(\r",
+							"            'id', 'text', 'parentComment', 'author', 'creationDate'\r",
+							"        );\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"All comments are from the same user\", function () {\r",
+							"    const ownerName = \"User 1\";\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment.author).to.eql(ownerName);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comments are sorted by creationDate descending\", function () {\r",
+							"    for (let i = 0; i < response.length - 1; i++) {\r",
+							"        const current = new Date(response[i].creationDate);\r",
+							"        const next = new Date(response[i + 1].creationDate);\r",
+							"        pm.expect(current >= next).to.be.true;\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamps are valid\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        const timestamp = new Date(comment.creationDate);\r",
+							"        pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"        pm.expect(comment.creationDate).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": "{{base_url}}/users/{{owner_id}}/comments"
+			},
+			"response": []
+		},
+		{
+			"name": "User get own comments with param SHOW_DELETED",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const userId = pm.environment.get(\"user1_id\");\r",
+							"const eventId = pm.environment.get(\"event3_id\");\r",
+							"const comment4Id = pm.environment.get(\"comment4_id\");\r",
+							"const comment5Id = pm.environment.get(\"comment5_id\");\r",
+							"\r",
+							"pm.variables.set(\"user_id\", userId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"comment4_id\", comment4Id);\r",
+							"pm.variables.set(\"comment5_id\", comment5Id);\r",
+							"console.log(\"User ID:\", userId);\r",
+							"console.log(\"Event ID:\", eventId);\r",
+							"console.log(\"Comment 4 ID:\", comment4Id);\r",
+							"console.log(\"Comment 5 ID:\", comment5Id);\r",
+							"\r",
+							"// Удаляем два комментария\r",
+							"deleteComments([comment4Id, comment5Id]);\r",
+							"\r",
+							"function deleteComments(commentIds) {\r",
+							"    function deleteComment(index) {\r",
+							"        if (index >= commentIds.length) {\r",
+							"            console.log(\"Все комментарии удалены\");\r",
+							"            return;\r",
+							"        }\r",
+							"\r",
+							"        const commentId = commentIds[index];\r",
+							"        pm.sendRequest({\r",
+							"            url: `${baseUrl}/users/${userId}/events/${eventId}/comments/${commentId}/status?command=DELETE`,\r",
+							"            method: 'PATCH',\r",
+							"            header: { 'Content-Type': 'application/json' }\r",
+							"        }, function (err, res) {\r",
+							"            if (err) {\r",
+							"                console.error(\"Ошибка при удалении комментария:\", err);\r",
+							"            } else {\r",
+							"                const response = res.json();\r",
+							"                console.log(`Комментарий ${commentId} удалён, новый статус:`, response.status);\r",
+							"            }\r",
+							"            deleteComment(index + 1);\r",
+							"        });\r",
+							"    }\r",
+							"\r",
+							"    deleteComment(0);\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response is an array\", function () {\r",
+							"    pm.expect(Array.isArray(response)).to.be.true;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response has exactly 2 comments\", function () {\r",
+							"    pm.expect(response.length).to.eql(2);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Each comment has correct structure\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment).to.include.all.keys(\r",
+							"            'id', 'text', 'parentComment', 'author', 'creationDate'\r",
+							"        );\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comments are from correct user\", function () {\r",
+							"    const userName = \"User 1\";\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment.author).to.eql(userName);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comment IDs match deleted ones\", function () {\r",
+							"    const comment4Id = Number(pm.variables.get(\"comment4_id\"));\r",
+							"    const comment5Id = Number(pm.variables.get(\"comment5_id\"));\r",
+							"    const responseIds = response.map(c => c.id);\r",
+							"    \r",
+							"    pm.expect(responseIds).to.include(comment4Id);\r",
+							"    pm.expect(responseIds).to.include(comment5Id);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamps are valid\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        const timestamp = new Date(comment.creationDate);\r",
+							"        pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"        pm.expect(comment.creationDate).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Text is not empty\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment.text).to.not.be.empty;\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Parent comment is null or number\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        if (comment.parentComment !== null) {\r",
+							"            pm.expect(comment.parentComment).to.be.a('number');\r",
+							"        }\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user1_id}}/comments?param=SHOW_DELETED",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user1_id}}",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "param",
+							"value": "SHOW_DELETED"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User get own comments with param SHOW_ACTIVE",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const userId = pm.environment.get(\"user1_id\");\r",
+							"const eventId = pm.environment.get(\"event3_id\");\r",
+							"const comment1Id = pm.environment.get(\"comment_id\");\r",
+							"const comment3Id = pm.environment.get(\"comment3_id\");\r",
+							"const comment6Id = pm.environment.get(\"comment6_id\");\r",
+							"const comment7Id = pm.environment.get(\"comment7_id\");\r",
+							"\r",
+							"pm.variables.set(\"user_id\", userId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"comment1_id\", comment1Id);\r",
+							"pm.variables.set(\"comment3_id\", comment3Id);\r",
+							"pm.variables.set(\"comment6_id\", comment6Id);\r",
+							"pm.variables.set(\"comment7_id\", comment7Id);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response is an array\", function () {\r",
+							"    pm.expect(Array.isArray(response)).to.be.true;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response has exactly 4 comments\", function () {\r",
+							"    pm.expect(response.length).to.eql(4);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Each comment has correct structure\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment).to.include.all.keys(\r",
+							"            'id', 'text', 'parentComment', 'author', 'creationDate'\r",
+							"        );\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comments are from correct user\", function () {\r",
+							"    const userName = \"User 1\";\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment.author).to.eql(userName);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comment IDs match active ones\", function () {\r",
+							"    const comment1Id = Number(pm.variables.get(\"comment1_id\"));\r",
+							"    const comment3Id = Number(pm.variables.get(\"comment3_id\"));\r",
+							"    const comment6Id = Number(pm.variables.get(\"comment6_id\"));\r",
+							"    const comment7Id = Number(pm.variables.get(\"comment7_id\"));\r",
+							"    const responseIds = response.map(c => c.id);\r",
+							"    \r",
+							"    pm.expect(responseIds).to.include(comment1Id);\r",
+							"    pm.expect(responseIds).to.include(comment3Id);\r",
+							"    pm.expect(responseIds).to.include(comment6Id);\r",
+							"    pm.expect(responseIds).to.include(comment7Id);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamps are valid\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        const timestamp = new Date(comment.creationDate);\r",
+							"        pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"        pm.expect(comment.creationDate).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Text is not empty\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment.text).to.not.be.empty;\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Parent comment is null or number\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        if (comment.parentComment !== null) {\r",
+							"            pm.expect(comment.parentComment).to.be.a('number');\r",
+							"        }\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user1_id}}/comments?param=SHOW_ACTIVE",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user1_id}}",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "param",
+							"value": "SHOW_ACTIVE"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User get own comments with param SHOW_ALL",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.environment.get(\"base_url\");\r",
+							"\r",
+							"const userId = pm.environment.get(\"user1_id\");\r",
+							"const eventId = pm.environment.get(\"event3_id\");\r",
+							"const comment1Id = pm.environment.get(\"comment_id\");\r",
+							"const comment3Id = pm.environment.get(\"comment3_id\");\r",
+							"const comment4Id = pm.environment.get(\"comment4_id\");\r",
+							"const comment5Id = pm.environment.get(\"comment5_id\");\r",
+							"const comment6Id = pm.environment.get(\"comment6_id\");\r",
+							"const comment7Id = pm.environment.get(\"comment7_id\");\r",
+							"\r",
+							"pm.variables.set(\"user_id\", userId);\r",
+							"pm.variables.set(\"event_id\", eventId);\r",
+							"pm.variables.set(\"comment1_id\", comment1Id);\r",
+							"pm.variables.set(\"comment3_id\", comment3Id);\r",
+							"pm.variables.set(\"comment3_id\", comment4Id);\r",
+							"pm.variables.set(\"comment3_id\", comment5Id);\r",
+							"pm.variables.set(\"comment6_id\", comment6Id);\r",
+							"pm.variables.set(\"comment7_id\", comment7Id);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response is an array\", function () {\r",
+							"    pm.expect(Array.isArray(response)).to.be.true;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response has exactly 6 comments\", function () {\r",
+							"    pm.expect(response.length).to.eql(6);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Each comment has correct structure\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment).to.include.all.keys(\r",
+							"            'id', 'text', 'parentComment', 'author', 'creationDate'\r",
+							"        );\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comments are from correct user\", function () {\r",
+							"    const userName = \"User 1\";\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment.author).to.eql(userName);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Comment IDs match ones\", function () {\r",
+							"    const comment1Id = Number(pm.variables.get(\"comment1_id\"));\r",
+							"    const comment3Id = Number(pm.variables.get(\"comment3_id\"));\r",
+							"    const comment4Id = Number(pm.variables.get(\"comment4_id\"));\r",
+							"    const comment5Id = Number(pm.variables.get(\"comment5_id\"));\r",
+							"    const comment6Id = Number(pm.variables.get(\"comment6_id\"));\r",
+							"    const comment7Id = Number(pm.variables.get(\"comment7_id\"));\r",
+							"    const responseIds = response.map(c => c.id);\r",
+							"    \r",
+							"    pm.expect(responseIds).to.include(comment1Id);\r",
+							"    pm.expect(responseIds).to.include(comment3Id);\r",
+							"    pm.expect(responseIds).to.include(comment4Id);\r",
+							"    pm.expect(responseIds).to.include(comment5Id);\r",
+							"    pm.expect(responseIds).to.include(comment6Id);\r",
+							"    pm.expect(responseIds).to.include(comment7Id);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Timestamps are valid\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        const timestamp = new Date(comment.creationDate);\r",
+							"        pm.expect(isNaN(timestamp.getTime())).to.be.false;\r",
+							"        pm.expect(comment.creationDate).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Text is not empty\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        pm.expect(comment.text).to.not.be.empty;\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Parent comment is null or number\", function () {\r",
+							"    response.forEach(comment => {\r",
+							"        if (comment.parentComment !== null) {\r",
+							"            pm.expect(comment.parentComment).to.be.a('number');\r",
+							"        }\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/users/{{user1_id}}/comments?param=SHOW_ALL",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"{{user1_id}}",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "param",
+							"value": "SHOW_ALL"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

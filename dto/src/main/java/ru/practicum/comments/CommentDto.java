@@ -1,14 +1,22 @@
 package ru.practicum.comments;
 
-import ru.practicum.user.UserShortDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
 import java.time.LocalDateTime;
 
+@Value
+@Builder
+@Jacksonized
 public class CommentDto {
     private Long id;
     private String text;
-    private Long parentCommentId;
-    private UserShortDto author;
-    private LocalDateTime createdDate;
+    private Long parentComment;
+    private String author;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime creationDate;
 
 }

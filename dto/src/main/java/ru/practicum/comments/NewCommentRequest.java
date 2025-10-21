@@ -15,6 +15,4 @@ public class NewCommentRequest {
     @Size(max = 1000)
     private String text;
 
-    private Long parentCommentId;
-
 }

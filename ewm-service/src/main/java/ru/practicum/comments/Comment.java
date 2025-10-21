@@ -49,10 +49,12 @@ public class Comment {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
+    @Column(name = "created_at")
     private LocalDateTime creationDate;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updateDate;
 
     @Builder.Default

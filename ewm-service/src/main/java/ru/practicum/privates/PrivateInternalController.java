@@ -103,6 +103,7 @@ public class PrivateInternalController {
     //Comments
 
     @PostMapping("/events/{eventId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
     public CommentDto addComment(
             @PathVariable Long userId,
             @PathVariable Long eventId,
@@ -131,18 +132,19 @@ public class PrivateInternalController {
         return privateService.updateComment(userId, eventId, commentId, request);
     }
 
-    @PatchMapping("events/{eventId}/comments/{commentId}")
+    @PatchMapping("events/{eventId}/comments/{commentId}/status")
     public CommentDto updateCommentStatus(
             @PathVariable Long userId,
             @PathVariable Long eventId,
             @PathVariable Long commentId,
-            @RequestBody CommentCommand command
+            @RequestParam CommentCommand command
     ) {
         return privateService.updateCommentStatus(userId, eventId, commentId, command);
     }
 
 
     @PostMapping("events/{eventId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.CREATED)
     public CommentDto replyToComment(
             @PathVariable Long userId,
             @PathVariable Long eventId,
@@ -166,7 +168,7 @@ public class PrivateInternalController {
     public SimpleEventDto updateCommentsSetting(
             @PathVariable Long userId,
             @PathVariable Long eventId,
-            @RequestParam(defaultValue = "false") CommentsSetting command
+            @RequestParam CommentsSetting command
     ) {
         return privateService.updateCommentsSetting(userId, eventId, command);
     }

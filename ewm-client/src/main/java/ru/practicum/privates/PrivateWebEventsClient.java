@@ -10,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 import ru.practicum.base.BaseWebClient;
 import ru.practicum.events.*;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.EventDataException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
@@ -114,9 +115,17 @@ public class PrivateWebEventsClient extends BaseWebClient {
                                 .handle((bodyError, sinc) -> {
                                     sinc.error(new NotFoundException(bodyError));
                                 }))
+                .onStatus(status -> status == HttpStatus.FORBIDDEN, response ->
+                        response.bodyToMono(String.class)
+                                .handle((bodyError, sinc) -> {
+                                    sinc.error(new ForbiddenException(bodyError));
+                                }))
+                .onStatus(status -> status == HttpStatus.CONFLICT, response ->
+                        response.bodyToMono(String.class)
+                                .handle((errorBody, sink) -> {
+                                    sink.error(new ConflictException(errorBody));
+                                }))
                 .bodyToMono(SimpleEventDto.class)
                 .block();
     }
-
-
 }

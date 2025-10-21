@@ -406,12 +406,16 @@ public class PrivateService {
                 () -> new NotFoundException("Comment with id=" + commentId + " was not found")
         );
 
-        if (!comment.getAuthor().equals(userId)) {
+        if (!comment.getAuthor().getId().equals(userId)) {
             throw new ForbiddenException("User " + userId + " cannot perform request ");
         }
 
         if (!comment.getEvent().getId().equals(eventId)) {
             throw new ForbiddenException("Comment with id=" + commentId + " is not for event=" + eventId);
+        }
+
+        if (comment.getText().trim().equalsIgnoreCase(request.getText().trim())) {
+            throw new ConflictException("Nothing to change");
         }
 
         comment.setText(request.getText());
@@ -572,6 +576,19 @@ public class PrivateService {
         Event event = eventRepository.findById(eventId).orElseThrow(
                 () -> new NotFoundException("Event with id=" + eventId + " was not found")
         );
+
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new ForbiddenException("User with id=" + userId + " not allowed to update comment settings");
+        }
+
+        if (command == CommentsSetting.DISABLE_COMMENTS && event.getCommentDisabled()) {
+            throw new ConflictException("Comments are already disabled");
+        }
+
+
+        if (command == CommentsSetting.ENABLE_COMMENTS && !event.getCommentDisabled()) {
+            throw new ConflictException("Comments are already enabled");
+        }
 
         switch(command) {
             case DISABLE_COMMENTS -> event.setCommentDisabled(true);

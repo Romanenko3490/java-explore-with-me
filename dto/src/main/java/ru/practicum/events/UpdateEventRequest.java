@@ -80,5 +80,7 @@ public class UpdateEventRequest implements Dateable {
         return title != null && !title.isBlank();
     }
 
-    public boolean hasCommentDisabled() {return  commentDisabled != null; }
+    public boolean hasCommentDisabled() {
+        return commentDisabled != null;
+    }
 }

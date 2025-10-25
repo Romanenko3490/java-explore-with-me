@@ -8,10 +8,10 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.practicum.events.EventDto;
-import ru.practicum.events.NewEventRequest;
-import ru.practicum.events.UpdateEventRequest;
+import ru.practicum.comments.*;
+import ru.practicum.events.*;
 import ru.practicum.requests.EventRequestStatusUpdateRequest;
 import ru.practicum.requests.EventRequestStatusUpdateResult;
 import ru.practicum.requests.RequestDto;
@@ -26,6 +26,7 @@ import java.util.List;
 public class PrivateController {
     private final PrivateWebEventsClient privateWebEventsClient;
     private final PrivateWebRequestsClient privateWebRequestsClient;
+    private final PrivateWebCommentsClient privateWebCommentsClient;
 
 
     //Private: События
@@ -117,6 +118,78 @@ public class PrivateController {
             @PathVariable @Min(1) Long requestId
     ) {
         return privateWebRequestsClient.cancelRequest(userId, requestId);
+    }
+
+    //comments
+
+    @PostMapping("/events/{eventId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto addComment(
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId,
+            @RequestBody @Valid NewCommentRequest request
+    ) {
+        return privateWebCommentsClient.addComment(userId, eventId, request);
+    }
+
+    @GetMapping("events/{eventId}/comments")
+    public Flux<CommentDto> getComments(
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId,
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "20") Integer size
+    ) {
+        return privateWebCommentsClient.getComments(userId, eventId, from, size);
+    }
+
+    @PatchMapping("events/{eventId}/comments/{commentId}")
+    public CommentDto updateComment(
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId,
+            @PathVariable @Min(1) Long commentId,
+            @RequestBody @Valid UpdateCommentRequest request
+    ) {
+        return privateWebCommentsClient.updateComment(userId, eventId, commentId, request);
+    }
+
+    @PatchMapping("events/{eventId}/comments/{commentId}/status")
+    public CommentDto updateCommentStatus(
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId,
+            @PathVariable @Min(1) Long commentId,
+            @RequestParam CommentCommand command
+    ) {
+        return privateWebCommentsClient.updateCommentStatus(userId, eventId, commentId, command);
+    }
+
+    @PostMapping("events/{eventId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto replyToComment(
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId,
+            @PathVariable @Min(1) Long commentId,
+            @RequestBody @Valid NewCommentRequest request
+    ) {
+        return privateWebCommentsClient.replyToComment(userId, eventId, commentId, request);
+    }
+
+    @GetMapping("/comments")
+    public Flux<CommentDto> getUserComments(
+            @PathVariable @Min(1) Long userId,
+            @RequestParam(defaultValue = "SHOW_ACTIVE") CommentsShowingParam param,
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "20") Integer size
+    ) {
+        return privateWebCommentsClient.getUserComments(userId, param, from, size);
+    }
+
+    @PatchMapping("/events/{eventId}/comments")
+    public SimpleEventDto updateCommentsSetting(
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId,
+            @RequestParam CommentsSetting command
+    ) {
+        return privateWebEventsClient.updateCommentsSetting(userId, eventId, command);
     }
 
 

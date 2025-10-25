@@ -6,9 +6,9 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.events.EventDto;
-import ru.practicum.events.NewEventRequest;
-import ru.practicum.events.UpdateEventRequest;
+import reactor.core.publisher.Flux;
+import ru.practicum.comments.*;
+import ru.practicum.events.*;
 import ru.practicum.requests.EventRequestStatusUpdateRequest;
 import ru.practicum.requests.EventRequestStatusUpdateResult;
 import ru.practicum.requests.RequestDto;
@@ -99,5 +99,79 @@ public class PrivateInternalController {
     ) {
         return privateService.cancelRequest(userId, requestId);
     }
+
+    //Comments
+
+    @PostMapping("/events/{eventId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto addComment(
+            @PathVariable Long userId,
+            @PathVariable Long eventId,
+            @RequestBody NewCommentRequest request
+    ) {
+        return privateService.addComment(userId, eventId, request);
+    }
+
+    @GetMapping("events/{eventId}/comments")
+    public Flux<CommentDto> getComments(
+            @PathVariable Long userId,
+            @PathVariable Long eventId,
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "20") Integer size
+    ) {
+        return privateService.getComments(userId, eventId, from, size);
+    }
+
+    @PatchMapping("events/{eventId}/comments/{commentId}")
+    public CommentDto updateComment(
+            @PathVariable Long userId,
+            @PathVariable Long eventId,
+            @PathVariable Long commentId,
+            @RequestBody UpdateCommentRequest request
+    ) {
+        return privateService.updateComment(userId, eventId, commentId, request);
+    }
+
+    @PatchMapping("events/{eventId}/comments/{commentId}/status")
+    public CommentDto updateCommentStatus(
+            @PathVariable Long userId,
+            @PathVariable Long eventId,
+            @PathVariable Long commentId,
+            @RequestParam CommentCommand command
+    ) {
+        return privateService.updateCommentStatus(userId, eventId, commentId, command);
+    }
+
+
+    @PostMapping("events/{eventId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto replyToComment(
+            @PathVariable Long userId,
+            @PathVariable Long eventId,
+            @PathVariable Long commentId,
+            @RequestBody NewCommentRequest request
+    ) {
+        return privateService.replyToComment(userId, eventId, commentId, request);
+    }
+
+    @GetMapping("/comments")
+    public Flux<CommentDto> getUserComments(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "SHOW_ACTIVE") CommentsShowingParam param,
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "20") Integer size
+    ) {
+        return privateService.getUserComments(userId, param, from, size);
+    }
+
+    @PatchMapping("/events/{eventId}/comments")
+    public SimpleEventDto updateCommentsSetting(
+            @PathVariable Long userId,
+            @PathVariable Long eventId,
+            @RequestParam CommentsSetting command
+    ) {
+        return privateService.updateCommentsSetting(userId, eventId, command);
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package ru.practicum.privates;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -8,15 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import ru.practicum.base.BaseWebClient;
-import ru.practicum.events.EventDto;
-import ru.practicum.events.NewEventRequest;
-import ru.practicum.events.UpdateEventRequest;
+import ru.practicum.events.*;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.EventDataException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class PrivateWebEventsClient extends BaseWebClient {
     private static final String API_PREFIX = "/users";
@@ -101,5 +102,30 @@ public class PrivateWebEventsClient extends BaseWebClient {
         }
     }
 
-
+    public SimpleEventDto updateCommentsSetting(Long userId, Long eventId, CommentsSetting command) {
+        return webClient.patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/" + userId + "/events/" + eventId + "/comments")
+                        .queryParam("command", command)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(status -> status == HttpStatus.NOT_FOUND, response ->
+                        response.bodyToMono(String.class)
+                                .handle((bodyError, sinc) -> {
+                                    sinc.error(new NotFoundException(bodyError));
+                                }))
+                .onStatus(status -> status == HttpStatus.FORBIDDEN, response ->
+                        response.bodyToMono(String.class)
+                                .handle((bodyError, sinc) -> {
+                                    sinc.error(new ForbiddenException(bodyError));
+                                }))
+                .onStatus(status -> status == HttpStatus.CONFLICT, response ->
+                        response.bodyToMono(String.class)
+                                .handle((errorBody, sink) -> {
+                                    sink.error(new ConflictException(errorBody));
+                                }))
+                .bodyToMono(SimpleEventDto.class)
+                .block();
+    }
 }
